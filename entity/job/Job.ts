@@ -4,7 +4,19 @@ import {Page} from "@playwright/test";
 export interface Job {
 
 
-    sync(date: Date) : void;
-    run(page: Page): Promise<object>;
+    /**
+     * 예상 데이터 구조
+     * {
+     *    '오정노인복지기관' : {
+     *         'notice' : [...],
+     *         'recruit : [...],
+     *         ...
+     *     }
+     * }
+     * 단일 구조임
+     */
+    run(page: Page): Promise<Record<string, any[]>>;
+    sync() : void;
+    lastModifiedSync() : void;
 
 }

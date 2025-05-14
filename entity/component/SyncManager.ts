@@ -3,24 +3,40 @@ import fs from "node:fs";
 
 export class SyncManager {
 
-    static async sync(jobName: string, date: Date): Promise<Date> {
+    static sync(jobName: string): Date {
         try {
             const syncFolderPath = path.join(process.cwd(), 'sync')
             const filePath = path.join(syncFolderPath, `${jobName}.txt`);
 
             // 2. 작업이름.txt 파일 존재 확인
             if (!fs.existsSync(filePath)) {
-                // 파일이 없으면 생성하고 현재 날짜 저장
-                const dateString = this.formatDate(date);
+                const today = new Date();
+                const dateString = this.formatDate(today);
                 fs.writeFileSync(filePath, dateString, 'utf-8');
                 console.log(`파일 생성됨: ${filePath} with date: ${dateString}`);
+                return today;
             }
+            const dateString = fs.readFileSync(filePath, 'utf-8').trim();
 
-            return date;
+            return this.parseDate(dateString);
         } catch (error) {
             console.error(`Job.syncSync 에러 발생:`, error);
             throw error;
         }
+    }
+
+    static lastModifiedSync(jobName: string) : Date {
+        const syncFolderPath = path.join(process.cwd(), 'sync')
+        const filePath = path.join(syncFolderPath, `${jobName}.txt`);
+
+        const today = new Date();
+        const tomorrow = new Date(today);
+        tomorrow.setDate(today.getDate() + 1);
+        tomorrow.setHours(0, 0, 0, 0);
+
+        const dateString = this.formatDate(tomorrow);
+        fs.writeFileSync(filePath, dateString, 'utf-8');
+        return tomorrow;
     }
 
     static formatDate(date: Date): string {
@@ -37,4 +53,16 @@ export class SyncManager {
     static parse(year: number, month: number, day: number) {
         return new Date(year, month - 1, day);
     }
+
+    static isDateAfter(syncDate: Date, date: Date | null): boolean {
+        if (!date) return true;
+
+        syncDate.setHours(0, 0, 0, 0);
+        const targetDate = new Date(date);
+        targetDate.setHours(0, 0, 0, 0);
+
+        // console.log(`syncDate : ${syncDate}, targetDate : ${targetDate}, result : ${targetDate >= syncDate}`)
+        return targetDate >= syncDate;
+    }
+
 }

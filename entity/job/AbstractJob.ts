@@ -1,7 +1,7 @@
 import {Job} from "./Job";
 import {Step} from "../step/Step";
 import {Page} from "@playwright/test";
-import {SyncManager} from "./SyncManager";
+import {SyncManager} from "../component/SyncManager";
 
 export abstract class AbstractJob implements Job {
 
@@ -16,17 +16,25 @@ export abstract class AbstractJob implements Job {
         this.steps = steps;
     }
 
-    async sync(date: Date): Promise<void> {
-        this.syncDate = await SyncManager.sync(this.jobName, date);
+    sync() {
+        this.syncDate = SyncManager.sync(this.jobName);
     }
 
-    async run(page: Page): Promise<object> {
-        let list : object = {};
+    lastModifiedSync() {
+        this.syncDate = SyncManager.lastModifiedSync(this.jobName);
+    }
+
+
+    async run(page: Page): Promise<Record<string, any>> {
+        let list : Record<string, any[]> = {};
         for (const step of this.steps) {
             const result = await step.run(page, this.syncDate, this.baseUrl);
             list = {...list, ...result};
         }
-        return list;
+        if (Object.entries(list).length <= 0) return null;
+        return {
+            [this.jobName] : list
+        };
     }
 
 
