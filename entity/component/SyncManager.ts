@@ -46,8 +46,8 @@ export class SyncManager {
         return `${year}-${month}-${day}`;
     }
 
-    static parseDate(dateString: string): Date {
-        const [year, month, day] = dateString.split('-').map(num => parseInt(num, 10));
+    static parseDate(dateString: string, split : string = '-'): Date {
+        const [year, month, day] = dateString.split(split).map(num => parseInt(num, 10));
         return new Date(year, month - 1, day);
     }
     static parse(year: number, month: number, day: number) {

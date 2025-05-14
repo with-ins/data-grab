@@ -22,7 +22,7 @@ export class FileManager {
         if (fs.existsSync(resultFile)) {
             const results = JSON.parse(fs.readFileSync(resultFile, 'utf-8'));
             console.log('최종 결과:', results);
-            fs.unlinkSync(resultFile); // 파일삭제
+            // fs.unlinkSync(resultFile); // 파일삭제
         }
     }
 }
