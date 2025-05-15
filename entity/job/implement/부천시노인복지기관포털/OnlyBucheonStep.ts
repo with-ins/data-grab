@@ -1,13 +1,14 @@
 import {AbstractStep} from "../../../step/AbstractStep";
 import {Page} from "@playwright/test";
 import {SyncManager} from "../../../component/SyncManager";
+import {Category} from "../../../Category";
 
 export class OnlyBucheonDefaultStep extends AbstractStep {
 
-    private readonly category : string;
+    private readonly category : Category;
     private readonly url : string;
 
-    constructor(category: string, url : string) {
+    constructor(category: Category, url : string) {
         super();
         this.category = category;
         this.url = url;

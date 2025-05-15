@@ -6,6 +6,7 @@ import {Job} from "../entity/job/Job";
 import {부천시니어클럽} from "../entity/job/implement/부천시노인복지기관포털/부천시니어클럽";
 import {FileManager} from "../entity/component/FileManager";
 import {인천종합사회복지관} from "../entity/job/implement/인천종합사회복지관";
+import {서울시사회복지사협회} from "../entity/job/implement/서울시사회복지사협회";
 
 
 /**
@@ -28,7 +29,8 @@ const jobs : Job[] = [
     // new 원미노인복지관(),
     // new 소사노인복지관(),
     // new 부천시니어클럽(),
-    new 인천종합사회복지관(),
+    // new 인천종합사회복지관(),
+    new 서울시사회복지사협회(),
 ]
 test.describe('withIns 크롤링', () => {
 
