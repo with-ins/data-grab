@@ -5,10 +5,10 @@ import {SyncManager} from "../component/SyncManager";
 
 export abstract class AbstractJob implements Job {
 
-    public readonly jobName: string;
+    readonly jobName: string;
     private readonly baseUrl: string;
+    private readonly steps : Step[];
     private syncDate : Date | null;
-    private steps : Step[];
 
     protected constructor(jobName: string, baseUrl: string, steps: Step[]) {
         this.jobName = jobName;
@@ -36,6 +36,7 @@ export abstract class AbstractJob implements Job {
             [this.jobName] : list
         };
     }
+
 
 
 }

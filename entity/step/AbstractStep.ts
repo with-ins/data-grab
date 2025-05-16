@@ -5,7 +5,7 @@ import {SyncManager} from "../component/SyncManager";
 export abstract class AbstractStep implements Step {
 
     async run(page: Page, syncDate: Date, baseUrl: string): Promise<Record<string, any[]>> {
-        const result: Record<string, any[]> = await this.execute(page, baseUrl);
+        const result: Record<string, any[]> = await this.execute(page, baseUrl, syncDate);
         this.removeSyncBeforeExclude(result, syncDate);
         return result;
     }
@@ -29,6 +29,6 @@ export abstract class AbstractStep implements Step {
         keysToDelete.forEach(key => delete result[key]);
     }
 
-    abstract execute(page: Page, baseUrl: string) : Promise<Record<string, any[]>>;
+    abstract execute(page: Page, baseUrl: string, syncDate: Date) : Promise<Record<string, any[]>>;
 
 }

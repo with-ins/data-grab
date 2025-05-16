@@ -46,11 +46,14 @@ export class SyncManager {
         return `${year}-${month}-${day}`;
     }
 
-    static parseDate(dateString: string, split : string = '-'): Date {
-        const [year, month, day] = dateString.split(split).map(num => parseInt(num, 10));
-        return new Date(year, month - 1, day);
-    }
-    static parse(year: number, month: number, day: number) {
+    static parseDate(dateString: string, split: string = '-'): Date {
+        const parts = dateString.split(split).map(num => parseInt(num, 10));
+
+        if (parts.length !== 3 || parts.some(isNaN)) {
+            throw new Error(`Invalid date format: ${dateString}`);
+        }
+
+        const [year, month, day] = parts;
         return new Date(year, month - 1, day);
     }
 

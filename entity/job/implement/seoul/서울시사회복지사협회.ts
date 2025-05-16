@@ -1,8 +1,8 @@
-import {AbstractJob} from "../AbstractJob";
+import {AbstractJob} from "../../AbstractJob";
 import {Locator} from "@playwright/test";
-import {SyncManager} from "../../component/SyncManager";
-import {SimpleTemplateStep} from "../../step/SimpleTemplateStep";
-import {Category} from "../../Category";
+import {SyncManager} from "../../../component/SyncManager";
+import {SimpleTemplateStep} from "../../../step/SimpleTemplateStep";
+import {Category} from "../../../Category";
 import {type} from "node:os";
 
 export class 서울시사회복지사협회 extends AbstractJob {
@@ -42,7 +42,7 @@ class SeoulEventStep extends SimpleTemplateStep {
         const createAt = SyncManager.parseDate((await card.locator('.time').textContent()).trim(), '.');
 
         return {
-            'id' : Number(id),
+            'id' : parseInt(id),
             'title' : title,
             'createAt' : createAt,
             'link' : link,
@@ -68,7 +68,7 @@ class SeoulRecruitStep extends SimpleTemplateStep {
         const createAt = SyncManager.parseDate((await card.locator('.time').textContent()).trim(), '.');
 
         return {
-            'id' : Number(id),
+            'id' : parseInt(id),
             'title' : title,
             'createAt' : createAt,
             'link' : link,
@@ -98,7 +98,7 @@ class SeoulNoticeStep extends SimpleTemplateStep {
         const createAt = SyncManager.parseDate((await card.locator('.time').textContent()).trim(), '.');
 
         return {
-            'id' : Number(id),
+            'id' : parseInt(id),
             'title' : title,
             'createAt' : createAt,
             'link' : link,

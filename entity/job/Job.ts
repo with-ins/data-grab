@@ -3,6 +3,7 @@ import {Page} from "@playwright/test";
 
 export interface Job {
 
+    jobName: string;
 
     /**
      * 예상 데이터 구조

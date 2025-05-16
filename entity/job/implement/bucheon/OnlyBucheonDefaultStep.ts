@@ -7,14 +7,16 @@ export class OnlyBucheonDefaultStep extends AbstractStep {
 
     private readonly category : Category;
     private readonly url : string;
+    private readonly parseToLink: (param1: string, param2: string, param3: string) => string;
 
-    constructor(category: Category, url : string) {
+    constructor(category: Category, url : string, parseToLink: (param1: string, param2: string, param3: string) => string) {
         super();
         this.category = category;
         this.url = url;
+        this.parseToLink = parseToLink;
     }
-    async execute(page: Page, baseUrl: string): Promise<Record<string, any[]>> {
-        await page.goto(this.url);
+    async execute(page: Page, baseUrl: string, syncDate: Date): Promise<Record<string, any[]>> {
+        await page.goto(this.url, { waitUntil: 'domcontentloaded' });
 
         await page.waitForSelector('.row:not(.head)');
 
@@ -46,14 +48,14 @@ export class OnlyBucheonDefaultStep extends AbstractStep {
     }
 
 
-    parseOnclick(onclickStr: string): string | null {
+    private parseOnclick(onclickStr: string): string | null {
         if (!onclickStr) return null;
 
         // 정규식으로 파라미터 추출
         const match = onclickStr.match(/opView\('([^']+)',\s*'([^']+)',\s*'([^']+)'\)/);
 
         if (match) {
-            return `https://senior.bucheon4u.kr/senior/user/bbs/BD_selectBbs.do?q_domnCode=${match[1]}&q_bbsCode=${match[2]}&q_bbscttSn=${match[3]}`;
+            return this.parseToLink(match[1], match[2], match[3]);
         }
 
         return null;

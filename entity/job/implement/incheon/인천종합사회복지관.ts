@@ -1,7 +1,8 @@
-import {AbstractJob} from "../AbstractJob";
-import {AbstractStep} from "../../step/AbstractStep";
+import {AbstractJob} from "../../AbstractJob";
+import {AbstractStep} from "../../../step/AbstractStep";
 import {Locator, Page} from "@playwright/test";
-import {SyncManager} from "../../component/SyncManager";
+import {SyncManager} from "../../../component/SyncManager";
+import {Category} from "../../../Category";
 
 
 export class 인천종합사회복지관 extends AbstractJob {
@@ -21,8 +22,8 @@ export class 인천종합사회복지관 extends AbstractJob {
 
 class IncheonWelfare extends AbstractStep {
 
-    async execute(page: Page, baseUrl: string): Promise<Record<string, any[]>> {
-        await page.goto('http://www.icwelfare.or.kr/main/sub.html?pageCode=28');
+    async execute(page: Page, baseUrl: string, syncDate: Date): Promise<Record<string, any[]>> {
+        await page.goto('http://www.icwelfare.or.kr/main/sub.html?pageCode=28', { waitUntil: 'domcontentloaded' });
         await page.waitForSelector('.mdWebzineWrap');
 
         const cards = await page.locator('.mdWebzineText').all();
@@ -50,7 +51,7 @@ class IncheonWelfare extends AbstractStep {
             })
         }
 
-        return {'WELFARE' : list}
+        return {[Category.WELFARE] : list}
     }
 
     private async getId(a: Locator) : Promise<string> {
@@ -61,8 +62,8 @@ class IncheonWelfare extends AbstractStep {
 }
 class IncheonEvent extends AbstractStep {
 
-    async execute(page: Page, baseUrl: string): Promise<Record<string, any[]>> {
-        await page.goto('http://www.icwelfare.or.kr/main/sub.html?pageCode=37');
+    async execute(page: Page, baseUrl: string, syncDate: Date): Promise<Record<string, any[]>> {
+        await page.goto('http://www.icwelfare.or.kr/main/sub.html?pageCode=37', { waitUntil: 'domcontentloaded' });
         await page.waitForSelector('.mdWebzineWrap');
 
         const cards = await page.locator('.mdWebzineText').all();
@@ -90,7 +91,7 @@ class IncheonEvent extends AbstractStep {
             })
         }
 
-        return {'EVENT' : list}
+        return {[Category.EVENT] : list}
     }
 
     private async getId(a: Locator) : Promise<string> {
@@ -101,9 +102,9 @@ class IncheonEvent extends AbstractStep {
 }
 class IncheonNotice extends AbstractStep {
 
-    async execute(page: Page, baseUrl: string): Promise<Record<string, any[]>> {
+    async execute(page: Page, baseUrl: string, syncDate: Date): Promise<Record<string, any[]>> {
 
-        await page.goto('http://www.icwelfare.or.kr/main/sub.html?pageCode=25');
+        await page.goto('http://www.icwelfare.or.kr/main/sub.html?pageCode=25', { waitUntil: 'domcontentloaded' });
 
         await page.waitForSelector('.mdResponsiveBody tbody')
 
@@ -129,7 +130,7 @@ class IncheonNotice extends AbstractStep {
             })
         }
 
-        return {'NOTICE' : list};
+        return {[Category.NOTICE] : list};
     }
 
 }

@@ -15,7 +15,7 @@ export abstract class SimpleTemplateStep extends AbstractStep {
         this.category = type;
     }
 
-    async execute(page: Page, baseUrl: string): Promise<Record<string, any[]>> {
+    async execute(page: Page, baseUrl: string, syncDate: Date): Promise<Record<string, any[]>> {
 
         await page.goto(this.url)
 
