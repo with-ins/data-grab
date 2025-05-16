@@ -2,6 +2,7 @@ import {AbstractJob} from "../../../AbstractJob";
 import {Category} from "../../../../Category";
 import {OnlyBucheonDefaultStep} from "../OnlyBucheonDefaultStep";
 import {OnlyBucheonImageStep} from "../OnlyBucheonImageStep";
+import {Optimize, Optimizer} from "../../../../Optimize";
 
 export class 소사본종합사회복지관 extends AbstractJob {
 
@@ -22,5 +23,9 @@ export class 소사본종합사회복지관 extends AbstractJob {
                 ),
 
             ]);
+    }
+
+    registerOptimizer(optimizer: Optimizer) {
+        optimizer.register(Optimize.JS)
     }
 }

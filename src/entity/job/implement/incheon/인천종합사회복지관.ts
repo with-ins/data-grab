@@ -3,6 +3,7 @@ import {AbstractStep} from "../../../step/AbstractStep";
 import {Locator, Page} from "@playwright/test";
 import {SyncManager} from "../../../component/SyncManager";
 import {Category} from "../../../Category";
+import {Optimizer} from "../../../Optimize";
 
 
 export class 인천종합사회복지관 extends AbstractJob {
@@ -24,7 +25,9 @@ class IncheonWelfare extends AbstractStep {
 
     async execute(page: Page, baseUrl: string, syncDate: Date): Promise<Record<string, any[]>> {
         await page.goto('http://www.icwelfare.or.kr/main/sub.html?pageCode=28', { waitUntil: 'domcontentloaded' });
-        await page.waitForSelector('.mdWebzineWrap');
+        await page.waitForSelector('.mdWebzineWrap', {
+            state: 'attached'
+        });
 
         const cards = await page.locator('.mdWebzineText').all();
 
@@ -64,7 +67,9 @@ class IncheonEvent extends AbstractStep {
 
     async execute(page: Page, baseUrl: string, syncDate: Date): Promise<Record<string, any[]>> {
         await page.goto('http://www.icwelfare.or.kr/main/sub.html?pageCode=37', { waitUntil: 'domcontentloaded' });
-        await page.waitForSelector('.mdWebzineWrap');
+        await page.waitForSelector('.mdWebzineWrap', {
+            state: 'attached'
+        });
 
         const cards = await page.locator('.mdWebzineText').all();
 
@@ -106,7 +111,9 @@ class IncheonNotice extends AbstractStep {
 
         await page.goto('http://www.icwelfare.or.kr/main/sub.html?pageCode=25', { waitUntil: 'domcontentloaded' });
 
-        await page.waitForSelector('.mdResponsiveBody tbody')
+        await page.waitForSelector('.mdResponsiveBody tbody', {
+            state: 'attached'
+        })
 
         const body = page.locator('tbody').first();
         const cards = await body.locator('tr:not(.jTh):not(.jTh2)').all();

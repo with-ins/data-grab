@@ -33,4 +33,13 @@ export class JobProcessor {
         }
     }
 
+    findJob(jobName: string) : Job | null {
+        for (const job of this.jobs) {
+            if (job.jobName == jobName) {
+                return job;
+            }
+        }
+        return null;
+    }
+
 }

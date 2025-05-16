@@ -3,6 +3,7 @@ import {SimpleTemplateStep} from "../../../step/SimpleTemplateStep";
 import {Locator} from "@playwright/test";
 import {Category} from "../../../Category";
 import {SyncManager} from "../../../component/SyncManager";
+import {Optimize, Optimizer} from "../../../Optimize";
 
 export class 인천광역시장애인종합복지관 extends AbstractJob {
 
@@ -16,6 +17,10 @@ export class 인천광역시장애인종합복지관 extends AbstractJob {
                 new 인천채용(),
             ]
         );
+    }
+
+    registerOptimizer(optimizer: Optimizer) {
+        optimizer.register(Optimize.JS)
     }
 }
 class 인천채용 extends SimpleTemplateStep {
@@ -130,7 +135,6 @@ class 인천공지사항 extends SimpleTemplateStep {
 
         let createAtStr = (await card.locator('.wr-date').textContent()).trim() // 05.01
         createAtStr = this.inferYearFromDate(createAtStr) // 2025.05.01
-        console.log(createAtStr)
         const createAt = SyncManager.parseDate(createAtStr, '.')
 
         return {

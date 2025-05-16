@@ -2,6 +2,7 @@ import {Job} from "./Job";
 import {Step} from "../step/Step";
 import {Page} from "@playwright/test";
 import {SyncManager} from "../component/SyncManager";
+import {Optimize, Optimizer} from "../Optimize";
 
 export abstract class AbstractJob implements Job {
 
@@ -24,12 +25,13 @@ export abstract class AbstractJob implements Job {
     }
 
     async run(page: Page): Promise<Record<string, any>> {
+        await this.optimizer(page);
         this.sync();
         let list = await this.runSteps(page);
         // 싱크를 맞추기 위함
         this.lastModifiedSync();
         // 값이 없으면 null 반환, 값이 있으면 Record 반환
-        return (Object.entries(list).length <= 0)
+        return (Object.entries(list).length === 0)
             ? null
             :{ [this.jobName] : list };
     }
@@ -42,4 +44,22 @@ export abstract class AbstractJob implements Job {
         }
         return list;
     }
+
+    private async optimizer(page: Page) : Promise<void> {
+        const optimizer: Optimizer = new Optimizer();
+        optimizer.registerAll([
+            Optimize.CSS, Optimize.IMAGE, Optimize.MEDIA, Optimize.FONT
+        ])
+        this.registerOptimizer(optimizer);
+
+        await page.route('**/*', route => {
+            const resourceType = route.request().resourceType();
+            if (optimizer.isBlocked(resourceType)) {
+                route.abort();
+            } else {
+                route.continue();
+            }
+        });
+    }
+    registerOptimizer(optimizer: Optimizer) : void {}
 }

@@ -8,9 +8,14 @@ export class SyncManager {
             const syncFolderPath = path.join(process.cwd(), 'sync')
             const filePath = path.join(syncFolderPath, `${jobName}.txt`);
 
+            // sync 폴더가 없으면 생성
+            if (!fs.existsSync(syncFolderPath)) {
+                fs.mkdirSync(syncFolderPath, { recursive: true });
+            }
+
             // 2. 작업이름.txt 파일 존재 확인
             if (!fs.existsSync(filePath)) {
-                const today = new Date();
+                const today = new Date(2025, 4, 1);
                 const dateString = this.formatDate(today);
                 fs.writeFileSync(filePath, dateString, 'utf-8');
                 console.log(`파일 생성됨: ${filePath} with date: ${dateString}`);

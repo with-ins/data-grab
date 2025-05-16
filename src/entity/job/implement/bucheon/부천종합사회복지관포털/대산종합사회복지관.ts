@@ -2,6 +2,7 @@ import {AbstractJob} from "../../../AbstractJob";
 import {Category} from "../../../../Category";
 import {OnlyBucheonDefaultStep} from "../OnlyBucheonDefaultStep";
 import {OnlyBucheonImageStep} from "../OnlyBucheonImageStep";
+import {Optimize, Optimizer} from "../../../../Optimize";
 
 export class 대산종합사회복지관 extends AbstractJob {
 
@@ -21,5 +22,9 @@ export class 대산종합사회복지관 extends AbstractJob {
                     (param1, param2, param3) => `https://welfare.bucheon4u.kr/welfare/user/bbs/BD_selectBbs.do?q_domnCode=${param1}&q_bbsCode=${param2}&q_bbscttSn=${param3}`
                 ),
             ]);
+    }
+
+    registerOptimizer(optimizer: Optimizer) {
+        optimizer.register(Optimize.JS)
     }
 }

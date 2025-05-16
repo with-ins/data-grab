@@ -4,10 +4,9 @@ import {SyncManager} from "../../../component/SyncManager";
 import {SimpleTemplateStep} from "../../../step/SimpleTemplateStep";
 import {Category} from "../../../Category";
 import {type} from "node:os";
+import {Optimize, Optimizer} from "../../../Optimize";
 
 export class 서울시사회복지사협회 extends AbstractJob {
-
-
     constructor() {
         super(
             '서울시사회복시자협회',
@@ -18,6 +17,10 @@ export class 서울시사회복지사협회 extends AbstractJob {
                 new SeoulEventStep(),
             ]
         );
+    }
+
+    registerOptimizer(optimizer: Optimizer) {
+        optimizer.register(Optimize.JS)
     }
 }
 class SeoulEventStep extends SimpleTemplateStep {

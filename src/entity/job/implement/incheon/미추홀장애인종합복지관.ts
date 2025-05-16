@@ -4,6 +4,7 @@ import {Locator, Page} from "@playwright/test";
 import {Category} from "../../../Category";
 import {SyncManager} from "../../../component/SyncManager";
 import {AbstractStep} from "../../../step/AbstractStep";
+import {Optimize, Optimizer} from "../../../Optimize";
 
 export class 미추홀장애인종합복지관 extends AbstractJob {
 
@@ -18,6 +19,10 @@ export class 미추홀장애인종합복지관 extends AbstractJob {
             ]
         );
     }
+
+    registerOptimizer(optimizer: Optimizer) {
+        optimizer.register(Optimize.JS)
+    }
 }
 
 class 미추홀소식 extends AbstractStep {
@@ -26,7 +31,9 @@ class 미추홀소식 extends AbstractStep {
 
         await page.goto('https://michurc.or.kr/bbs/board.php?bo_table=0204', {waitUntil : "domcontentloaded"});
 
-        await page.waitForSelector('#gall_ul');
+        await page.waitForSelector('#gall_ul', {
+            state: 'attached'
+        });
 
         const cards = await page.locator('.col-xs-12.col-sm-6.col-md-4.col-lg-3').all()
 
@@ -38,7 +45,9 @@ class 미추홀소식 extends AbstractStep {
             const link = await card.locator('a').first().getAttribute('href');
 
             await page.goto(link,  {waitUntil: "domcontentloaded"});
-            await page.waitForSelector('.panel-heading:not(.board_head)');
+            await page.waitForSelector('.panel-heading:not(.board_head)', {
+                state: 'attached'
+            });
 
             const title = await page.locator('.pull-left h6').evaluate((el) => {
                 let textContent = '';

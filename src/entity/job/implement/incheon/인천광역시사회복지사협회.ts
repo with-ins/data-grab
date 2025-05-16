@@ -3,6 +3,7 @@ import {SimpleTemplateStep} from "../../../step/SimpleTemplateStep";
 import {Category} from "../../../Category";
 import {Locator} from "@playwright/test";
 import {SyncManager} from "../../../component/SyncManager";
+import {Optimize, Optimizer} from "../../../Optimize";
 
 export class 인천광역시사회복지사협회 extends AbstractJob {
 
@@ -17,6 +18,10 @@ export class 인천광역시사회복지사협회 extends AbstractJob {
                 new 행사및교육(),
             ]
         );
+    }
+
+    registerOptimizer(optimizer: Optimizer) {
+        optimizer.register(Optimize.JS)
     }
 }
 class 행사및교육 extends SimpleTemplateStep {

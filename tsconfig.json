@@ -3,8 +3,21 @@
     "moduleResolution": "node",
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
-    "types": ["node", "@playwright/test"],
+    "types": ["node", "@playwright/test"],  // 기존 유지
     "target": "ES2020",
-    "module": "commonjs"
-  }
+    "module": "commonjs",
+    "outDir": "./dist",         // 빌드 출력 디렉토리 지정
+    "rootDir": "./src",         // 소스 디렉토리 지정
+    "declaration": true,        // 타입 선언 파일 생성
+    "removeComments": true,     // 주석 제거로 파일 크기 줄이기
+    "skipLibCheck": true        // 라이브러리 타입 체크 건너뛰어 빌드 속도 향상
+  },
+  "include": [
+    "src/**/*"                  // 소스 폴더 포함
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "tests/**/*"               // 테스트 파일은 빌드에서 제외
+  ]
 }

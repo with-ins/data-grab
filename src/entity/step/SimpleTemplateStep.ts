@@ -19,7 +19,9 @@ export abstract class SimpleTemplateStep extends AbstractStep {
 
         await page.goto(this.url)
 
-        await page.waitForSelector(this.selectorAll)
+        await page.waitForSelector(this.selectorAll, {
+            state: 'attached'
+        })
 
         const cards = await page.locator(this.selectorAll).all();
 

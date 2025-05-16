@@ -8,3 +8,7 @@ node_modules/
 
 /sync
 results.json
+dist/
+serverless.yml
+.serverless
+src/handler.ts
