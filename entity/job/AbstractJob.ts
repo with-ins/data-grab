@@ -24,17 +24,14 @@ export abstract class AbstractJob implements Job {
     }
 
     async run(page: Page): Promise<Record<string, any>> {
-        try {
-            this.sync();
-            let list = await this.runSteps(page);
-            // 값이 없으면 null 반환, 값이 있으면 Record 반환
-            return (Object.entries(list).length <= 0)
-                ? null
-                :{ [this.jobName] : list };
-        } finally {
-            // 싱크를 맞추기 위함
-            this.lastModifiedSync();
-        }
+        this.sync();
+        let list = await this.runSteps(page);
+        // 싱크를 맞추기 위함
+        this.lastModifiedSync();
+        // 값이 없으면 null 반환, 값이 있으면 Record 반환
+        return (Object.entries(list).length <= 0)
+            ? null
+            :{ [this.jobName] : list };
     }
 
     private async runSteps(page: Page) {

@@ -12,6 +12,7 @@ import {인천종합사회복지관} from "./implement/incheon/인천종합사�
 import {인천광역시장애인종합복지관} from "./implement/incheon/인천광역시장애인종합복지관";
 import {미추홀장애인종합복지관} from "./implement/incheon/미추홀장애인종합복지관";
 import {서울시사회복지사협회} from "./implement/seoul/서울시사회복지사협회";
+import {인천광역시사회복지사협회} from "./implement/incheon/인천광역시사회복지사협회";
 
 
 export class JobProcessor {
@@ -20,6 +21,7 @@ export class JobProcessor {
         new 소사본종합사회복지관(), new 상동종합사회복지관(), new 대산종합사회복지관(), new 춘의종합사회복지관(), new 심곡동종합사회복지관(),
         new 인천종합사회복지관(),
         new 인천광역시장애인종합복지관(),
+        new 인천광역시사회복지사협회(),
         new 미추홀장애인종합복지관(),
         new 서울시사회복지사협회(),
     ];
