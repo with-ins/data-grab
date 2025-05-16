@@ -17,7 +17,5 @@ export interface Job {
      * 단일 구조임
      */
     run(page: Page): Promise<Record<string, any[]>>;
-    sync() : void;
-    lastModifiedSync() : void;
 
 }

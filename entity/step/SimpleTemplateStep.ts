@@ -8,7 +8,7 @@ export abstract class SimpleTemplateStep extends AbstractStep {
     private readonly selectorAll : string;
     private readonly category : Category;
 
-    constructor(url: string, selectorAll: string, type: Category) {
+    protected constructor(url: string, selectorAll: string, type: Category) {
         super();
         this.url = url;
         this.selectorAll = selectorAll;
