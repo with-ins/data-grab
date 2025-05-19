@@ -1,7 +1,7 @@
-import {AbstractStep} from "../../../step/AbstractStep";
+import {AbstractStep} from "../../../../step/AbstractStep";
 import {Page} from "@playwright/test";
-import {SyncManager} from "../../../component/SyncManager";
-import {Category} from "../../../Category";
+import {SyncManager} from "../../../../component/SyncManager";
+import {Category} from "../../../../Category";
 
 export class OnlyBucheonDefaultStep extends AbstractStep {
 

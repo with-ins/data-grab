@@ -133,9 +133,16 @@ class 인천공지사항 extends SimpleTemplateStep {
         const title = (await card.locator('.wr-subject a').textContent()).trim()
         const link = await card.locator('.wr-subject a').getAttribute('href');
 
-        let createAtStr = (await card.locator('.wr-date').textContent()).trim() // 05.01
-        createAtStr = this.inferYearFromDate(createAtStr) // 2025.05.01
-        const createAt = SyncManager.parseDate(createAtStr, '.')
+        let createAt = null;
+        // 원래 05.13 이렇게 날짜가 나오지만 오늘나온경우 시간(14:36 형식으로 나옴) 인지 확인
+        if (await card.locator('.wr-date .orangered').count() > 0) {
+            // 시간이 표시된 경우에는 오늘날짜를 가리킴
+            createAt = new Date();
+        } else {
+            let createAtStr = (await card.locator('.wr-date').textContent()).trim() // 05.01
+            createAtStr = this.inferYearFromDate(createAtStr) // 2025.05.01
+            createAt = SyncManager.parseDate(createAtStr, '.')
+        }
 
         return {
             'id' : parseInt(id),

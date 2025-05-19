@@ -1,7 +1,7 @@
-import {AbstractStep} from "../../../step/AbstractStep";
-import {Category} from "../../../Category";
+import {AbstractStep} from "../../../../step/AbstractStep";
+import {Category} from "../../../../Category";
 import {Page} from "@playwright/test";
-import {SyncManager} from "../../../component/SyncManager";
+import {SyncManager} from "../../../../component/SyncManager";
 
 
 export class OnlyBucheonImageStep extends AbstractStep {
