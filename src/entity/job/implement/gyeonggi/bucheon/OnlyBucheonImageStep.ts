@@ -38,9 +38,9 @@ export class OnlyBucheonImageStep extends AbstractStep {
             });
 
             let dateStr = (await page.locator('.board_v_title > ul > li:nth-child(1) > span:nth-child(2)').textContent()).trim().slice(0, 10)
-            const createAt = SyncManager.parseDate(dateStr)
+            const createdAt = SyncManager.parseDate(dateStr)
 
-            if (!SyncManager.isDateAfter(syncDate, createAt)) {
+            if (!SyncManager.isDateAfter(syncDate, createdAt)) {
                 break;
             }
 
@@ -49,7 +49,7 @@ export class OnlyBucheonImageStep extends AbstractStep {
             list.push({
                 'id' : null,
                 'title' : title,
-                'createAt' : createAt,
+                'createdAt' : createdAt,
                 'link' : link,
             })
 

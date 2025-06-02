@@ -7,7 +7,7 @@
     "build": "tsc",
     "deploy": "npm run build && serverless deploy",
     "dev": "serverless offline start",
-    "test": "npx playwright test"
+    "test": "npx playwright test setup.spec.ts && npx playwright test withins.spec.ts && npx playwright test cleanup.spec.ts"
   },
   "keywords": [],
   "author": "",

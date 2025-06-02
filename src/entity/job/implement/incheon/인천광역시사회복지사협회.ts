@@ -45,12 +45,12 @@ class 행사및교육 extends SimpleTemplateStep {
         const id = params.get('idx');
 
         let dateStr = '20' + (await card.locator('td:nth-child(3)').textContent()).trim();
-        const createAt = SyncManager.parseDate(dateStr, '.');
+        const createdAt = SyncManager.parseDate(dateStr, '.');
 
         return {
             'id' : parseInt(id),
             'title' : title,
-            'createAt' : createAt,
+            'createdAt' : createdAt,
             'link' : link,
         }
     }
@@ -76,12 +76,12 @@ class 구인구직 extends SimpleTemplateStep {
         const id = params.get('idx');
 
         let dateStr = '20' + (await card.locator('td:nth-child(4)').textContent()).trim();
-        const createAt = SyncManager.parseDate(dateStr, '.');
+        const createdAt = SyncManager.parseDate(dateStr, '.');
 
         return {
             'id' : parseInt(id),
             'title' : title,
-            'createAt' : createAt,
+            'createdAt' : createdAt,
             'link' : link,
         }
     }
@@ -107,12 +107,12 @@ class 소식 extends SimpleTemplateStep {
         const id = params.get('idx');
 
         let dateStr = '20' + (await card.locator('td:nth-child(3)').textContent()).trim();
-        const createAt = SyncManager.parseDate(dateStr, '.');
+        const createdAt = SyncManager.parseDate(dateStr, '.');
 
         return {
             'id' : parseInt(id),
             'title' : title,
-            'createAt' : createAt,
+            'createdAt' : createdAt,
             'link' : link,
         }
     }
@@ -138,12 +138,12 @@ class 공지사항 extends SimpleTemplateStep {
         const id = params.get('idx');
 
         let dateStr = '20' + (await card.locator('td:nth-child(3)').textContent()).trim();
-        const createAt = SyncManager.parseDate(dateStr, '.');
+        const createdAt = SyncManager.parseDate(dateStr, '.');
 
         return {
             'id' : parseInt(id),
             'title' : title,
-            'createAt' : createAt,
+            'createdAt' : createdAt,
             'link' : link,
         }
     }

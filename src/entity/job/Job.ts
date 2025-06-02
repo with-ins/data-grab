@@ -16,6 +16,6 @@ export interface Job {
      * }
      * 단일 구조임
      */
-    run(page: Page): Promise<Record<string, any[]>>;
+    run(page: Page, syncDate: Date): Promise<Record<string, any[]>>;
 
 }

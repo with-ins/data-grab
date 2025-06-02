@@ -43,12 +43,12 @@ class 공지사항 extends SimpleTemplateStep {
         const dateDiv  = card.locator('.date_box');
         const yearMonth = (await dateDiv.locator('span').textContent()).trim();
         const day = (await dateDiv.locator('p').textContent()).trim();
-        const createAt = SyncManager.parseDate(yearMonth + '.' + day, '.');
+        const createdAt = SyncManager.parseDate(yearMonth + '.' + day, '.');
 
         return {
             'id' : parseInt(id),
             'title' : title,
-            'createAt' : createAt,
+            'createdAt' : createdAt,
             'link' : link,
         }
     }
@@ -81,12 +81,12 @@ class 채용 extends SimpleTemplateStep {
         const dateDiv  = card.locator('.date_box');
         const yearMonth = (await dateDiv.locator('span').textContent()).trim();
         const day = (await dateDiv.locator('p').textContent()).trim();
-        const createAt = SyncManager.parseDate(yearMonth + '.' + day, '.');
+        const createdAt = SyncManager.parseDate(yearMonth + '.' + day, '.');
 
         return {
             'id' : parseInt(id),
             'title' : title,
-            'createAt' : createAt,
+            'createdAt' : createdAt,
             'link' : link,
         }
     }

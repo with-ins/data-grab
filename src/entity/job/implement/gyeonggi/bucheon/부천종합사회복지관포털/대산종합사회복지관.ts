@@ -9,7 +9,7 @@ export class 대산종합사회복지관 extends AbstractJob {
     constructor() {
         super(
             '대산종합사회복지관',
-            'https://senior.bucheon4u.kr',
+            'https://welfare.bucheon4u.kr',
             [
                 new OnlyBucheonDefaultStep(
                     Category.NOTICE,

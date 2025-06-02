@@ -44,12 +44,12 @@ class IncheonWelfare extends AbstractStep {
             const pText = (await card.locator('p.mdDefaultW100.mdTextOverflow2.mdWzSsbj').textContent()).trim();
             const dateMatch = pText.match(/\d{4}\.\d{2}\.\d{2}/);
             const date = dateMatch ? dateMatch[0] : null;
-            const createAt = SyncManager.parseDate(date, '.');
+            const createdAt = SyncManager.parseDate(date, '.');
 
             list.push({
                 'id' : Number(id),
                 'title' : title,
-                'createAt' : createAt,
+                'createdAt' : createdAt,
                 'link' : link,
             })
         }
@@ -86,12 +86,12 @@ class IncheonEvent extends AbstractStep {
             const pText = (await card.locator('p.mdDefaultW100.mdTextOverflow2.mdWzSsbj').textContent()).trim();
             const dateMatch = pText.match(/\d{4}\.\d{2}\.\d{2}/);
             const date = dateMatch ? dateMatch[0] : null;
-            const createAt = SyncManager.parseDate(date, '.');
+            const createdAt = SyncManager.parseDate(date, '.');
 
             list.push({
                 'id' : Number(id),
                 'title' : title,
-                'createAt' : createAt,
+                'createdAt' : createdAt,
                 'link' : link,
             })
         }
@@ -127,12 +127,12 @@ class IncheonNotice extends AbstractStep {
             const title = await titleBox.textContent();
             const link = baseUrl + (await titleBox.getAttribute('href'))
 
-            const createAt : Date = SyncManager.parseDate((await card.locator('.jDate').textContent()).trim(), '.');
+            const createdAt : Date = SyncManager.parseDate((await card.locator('.jDate').textContent()).trim(), '.');
 
             list.push({
                 'id' : Number(id),
                 'title' : title,
-                'createAt' : createAt,
+                'createdAt' : createdAt,
                 'link' : link,
             })
         }

@@ -41,12 +41,12 @@ class 인천채용 extends SimpleTemplateStep {
 
         let dateStr = (await card.locator('.wr-date').textContent()).trim();
 
-        const createAt = SyncManager.parseDate(this.getStartDate(dateStr));
+        const createdAt = SyncManager.parseDate(this.getStartDate(dateStr));
 
         return {
             'id' : parseInt(id),
             'title' : title,
-            'createAt' : createAt,
+            'createdAt' : createdAt,
             'link' : link,
         }
     }
@@ -75,12 +75,12 @@ class 인천이벤트 extends SimpleTemplateStep {
         const id = urlParams.get('wr_id');
 
         const dateBeforeConvert = (await card.locator('.list-details .hidden-xs').textContent()).replace('|', '').trim();
-        const createAt = this.convertToDateFormat(dateBeforeConvert);
+        const createdAt = this.convertToDateFormat(dateBeforeConvert);
 
         return {
             'id' : parseInt(id),
             'title' : title,
-            'createAt' : createAt,
+            'createdAt' : createdAt,
             'link' : link,
         }
     }
@@ -133,21 +133,21 @@ class 인천공지사항 extends SimpleTemplateStep {
         const title = (await card.locator('.wr-subject a').textContent()).trim()
         const link = await card.locator('.wr-subject a').getAttribute('href');
 
-        let createAt = null;
+        let createdAt = null;
         // 원래 05.13 이렇게 날짜가 나오지만 오늘나온경우 시간(14:36 형식으로 나옴) 인지 확인
         if (await card.locator('.wr-date .orangered').count() > 0) {
             // 시간이 표시된 경우에는 오늘날짜를 가리킴
-            createAt = new Date();
+            createdAt = new Date();
         } else {
-            let createAtStr = (await card.locator('.wr-date').textContent()).trim() // 05.01
-            createAtStr = this.inferYearFromDate(createAtStr) // 2025.05.01
-            createAt = SyncManager.parseDate(createAtStr, '.')
+            let createdAtStr = (await card.locator('.wr-date').textContent()).trim() // 05.01
+            createdAtStr = this.inferYearFromDate(createdAtStr) // 2025.05.01
+            createdAt = SyncManager.parseDate(createdAtStr, '.')
         }
 
         return {
             'id' : parseInt(id),
             'title' : title,
-            'createAt' : createAt,
+            'createdAt' : createdAt,
             'link' : link,
         }
     }

@@ -1,5 +1,4 @@
 import {test} from '@playwright/test';
-import {FileManager} from "../src/entity/component/FileManager";
 import {JobProcessor} from "../src/entity/job/JobProcessor";
 
 
@@ -18,17 +17,17 @@ import {JobProcessor} from "../src/entity/job/JobProcessor";
  * }
  */
 
+
 const processor = new JobProcessor();
 
-test.describe('withIns 크롤링', () => {
-
+test.describe('크롤링',  () => {
+    processor.loadFetchSync();
     for (const job of processor) {
         test(job.jobName, async ({ page }) => {
-            const result = await job.run(page);
-            FileManager.save(result);
+            await processor.runner(page, job)
         });
     }
-
 });
+
 
 

@@ -13,7 +13,6 @@ export default defineConfig({
     trace: 'on-first-retry',
   },
   reporter: 'html',
-  globalTeardown: './global-teardown.ts',
   projects: [
     {
       name: 'chromium',

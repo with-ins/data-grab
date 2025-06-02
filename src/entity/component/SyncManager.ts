@@ -3,45 +3,68 @@ import fs from "node:fs";
 
 export class SyncManager {
 
-    static sync(jobName: string): Date {
-        try {
-            const syncFolderPath = path.join(process.cwd(), 'sync')
-            const filePath = path.join(syncFolderPath, `${jobName}.txt`);
+    private static url = 'http://localhost:8080/api/v1/sync';
+    private static fetchSyncJson = 'fetchSync.json';
+    private static fileName : string = 'results.json';
 
-            // sync 폴더가 없으면 생성
-            if (!fs.existsSync(syncFolderPath)) {
-                fs.mkdirSync(syncFolderPath, { recursive: true });
-            }
+    static save(jobName: string, result : Record<string, any>) {
+        const existingResults = fs.existsSync(this.fileName)
+            ? JSON.parse(fs.readFileSync(this.fileName, 'utf-8'))
+            : {
+                'complete' : [],
+                'news' : {}
+            };
 
-            // 2. 작업이름.txt 파일 존재 확인
-            if (!fs.existsSync(filePath)) {
-                const today = new Date(2025, 4, 1);
-                const dateString = this.formatDate(today);
-                fs.writeFileSync(filePath, dateString, 'utf-8');
-                console.log(`파일 생성됨: ${filePath} with date: ${dateString}`);
-                return today;
-            }
-            const dateString = fs.readFileSync(filePath, 'utf-8').trim();
+        existingResults.complete = [...existingResults['complete'], jobName];
+        existingResults.news = {...existingResults['news'], ...result};
 
-            return this.parseDate(dateString);
-        } catch (error) {
-            console.error(`Job.syncSync 에러 발생:`, error);
-            throw error;
-        }
+        fs.writeFileSync(this.fileName, JSON.stringify(existingResults));
     }
 
-    static lastModifiedSync(jobName: string) : Date {
+    private static initDelete() {
+        if (fs.existsSync(this.fileName)) {
+            fs.unlinkSync(this.fileName);
+        }
+        if (fs.existsSync(this.fetchSyncJson)) {
+            fs.unlinkSync(this.fetchSyncJson);
+        }
+    }
+    static async fetchSync() {
+        this.initDelete();
+        const json = await fetch(this.url).then(res => res.json());
+
         const syncFolderPath = path.join(process.cwd(), 'sync')
-        const filePath = path.join(syncFolderPath, `${jobName}.txt`);
+        const filePath = path.join(syncFolderPath, this.fetchSyncJson);
 
-        const today = new Date();
-        const tomorrow = new Date(today);
-        tomorrow.setDate(today.getDate() + 1);
-        tomorrow.setHours(0, 0, 0, 0);
+        // sync 폴더가 없으면 생성
+        if (!fs.existsSync(syncFolderPath)) {
+            fs.mkdirSync(syncFolderPath, { recursive: true });
+        }
 
-        const dateString = this.formatDate(tomorrow);
-        fs.writeFileSync(filePath, dateString, 'utf-8');
-        return tomorrow;
+        fs.writeFileSync(filePath, JSON.stringify(json), 'utf-8');
+        console.log(`파일 생성됨: ${filePath}`);
+    }
+
+    static async sync() {
+        await fetch(this.url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: fs.readFileSync(this.fileName, 'utf-8')
+        }).then(res => res.json())
+        .then(json => {
+            console.log(json);
+        })
+    }
+    static loadFetchSync() {
+        const syncFolderPath = path.join(process.cwd(), 'sync')
+        const filePath = path.join(syncFolderPath, this.fetchSyncJson);
+
+        if (!fs.existsSync(filePath)) {
+            throw new Error(`파일이 존재하지 않습니다: ${filePath}`);
+        }
+        return JSON.parse(fs.readFileSync(filePath, 'utf-8'));
     }
 
     static formatDate(date: Date): string {
@@ -59,7 +82,7 @@ export class SyncManager {
         }
 
         const [year, month, day] = parts;
-        return new Date(year, month - 1, day);
+        return new Date(year, month - 1, day + 1);
     }
 
     static isDateAfter(syncDate: Date, date: Date | null): boolean {

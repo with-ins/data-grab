@@ -9,7 +9,7 @@ import {Optimize, Optimizer} from "../../../Optimize";
 export class 서울시사회복지사협회 extends AbstractJob {
     constructor() {
         super(
-            '서울시사회복시자협회',
+            '서울시사회복지사협회',
             'https://sasw.or.kr',
             [
                 new SeoulNoticeStep(),
@@ -42,12 +42,12 @@ class SeoulEventStep extends SimpleTemplateStep {
 
         const link = baseUrl + await a.getAttribute('href');
         const title = (await a.textContent()).trim();
-        const createAt = SyncManager.parseDate((await card.locator('.time').textContent()).trim(), '.');
+        const createdAt = SyncManager.parseDate((await card.locator('.time').textContent()).trim(), '.');
 
         return {
             'id' : parseInt(id),
             'title' : title,
-            'createAt' : createAt,
+            'createdAt' : createdAt,
             'link' : link,
         }
     }
@@ -68,12 +68,12 @@ class SeoulRecruitStep extends SimpleTemplateStep {
 
         const link = baseUrl + await a.getAttribute('href');
         const title = (await a.textContent()).trim();
-        const createAt = SyncManager.parseDate((await card.locator('.time').textContent()).trim(), '.');
+        const createdAt = SyncManager.parseDate((await card.locator('.time').textContent()).trim(), '.');
 
         return {
             'id' : parseInt(id),
             'title' : title,
-            'createAt' : createAt,
+            'createdAt' : createdAt,
             'link' : link,
         }
     }
@@ -98,12 +98,12 @@ class SeoulNoticeStep extends SimpleTemplateStep {
 
         const link = baseUrl + await a.getAttribute('href');
         const title = (await a.textContent()).trim();
-        const createAt = SyncManager.parseDate((await card.locator('.time').textContent()).trim(), '.');
+        const createdAt = SyncManager.parseDate((await card.locator('.time').textContent()).trim(), '.');
 
         return {
             'id' : parseInt(id),
             'title' : title,
-            'createAt' : createAt,
+            'createdAt' : createdAt,
             'link' : link,
         }
     }

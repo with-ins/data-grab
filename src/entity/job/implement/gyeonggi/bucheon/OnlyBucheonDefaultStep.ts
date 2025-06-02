@@ -35,13 +35,13 @@ export class OnlyBucheonDefaultStep extends AbstractStep {
 
             const id = (await card.locator('.cell').first().textContent()).trim();
             const title = (await card.locator('.title .tit').textContent()).trim();
-            const createAt : Date = SyncManager.parseDate((await card.locator('.date').textContent()).trim());
+            const createdAt : Date = SyncManager.parseDate((await card.locator('.date').textContent()).trim());
             const link = this.parseOnclick(await card.locator('.tit_cont').getAttribute('onclick'));
 
             list.push({
                 'id' : Number(id),
                 'title' : title,
-                'createAt' : createAt,
+                'createdAt' : createdAt,
                 'link' : link,
             })
         }

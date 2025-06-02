@@ -17,19 +17,14 @@ export abstract class AbstractJob implements Job {
         this.steps = steps;
     }
 
-    private sync() {
-        this.syncDate = SyncManager.sync(this.jobName);
-    }
-    private lastModifiedSync() {
-        this.syncDate = SyncManager.lastModifiedSync(this.jobName)
+    private sync(syncDate: Date) {
+        this.syncDate = syncDate;
     }
 
-    async run(page: Page): Promise<Record<string, any>> {
+    async run(page: Page, syncDate: Date): Promise<Record<string, any>> {
         await this.optimizer(page);
-        this.sync();
+        this.sync(syncDate);
         let list = await this.runSteps(page);
-        // 싱크를 맞추기 위함
-        this.lastModifiedSync();
         // 값이 없으면 null 반환, 값이 있으면 Record 반환
         return (Object.entries(list).length === 0)
             ? null

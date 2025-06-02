@@ -63,14 +63,14 @@ class 미추홀소식 extends AbstractStep {
             let dateStr =  (await page.locator('.panel-heading .pull-right span:first-child').textContent()).trim();
             // 2025-05-15
             dateStr = ('20' + dateStr).slice(0, 10)
-            const createAt = SyncManager.parseDate(dateStr, '-');
+            const createdAt = SyncManager.parseDate(dateStr, '-');
 
-            if (!SyncManager.isDateAfter(syncDate, createAt)) break;
+            if (!SyncManager.isDateAfter(syncDate, createdAt)) break;
 
             list.push({
                 'id' : parseInt(id),
                 'title' : title,
-                'createAt' : createAt,
+                'createdAt' : createdAt,
                 'link' : link,
             })
             await page.goBack();
@@ -98,12 +98,12 @@ class 미추홀채용 extends SimpleTemplateStep {
         const a = card.locator('.td_subject > a');
         const link = await a.getAttribute('href');
         const title = (await a.textContent()).trim();
-        const createAt = SyncManager.parseDate((await card.locator('.td_date').textContent()).trim(), '-');
+        const createdAt = SyncManager.parseDate((await card.locator('.td_date').textContent()).trim(), '-');
 
         return {
             'id' : parseInt(id),
             'title' : title,
-            'createAt' : createAt,
+            'createdAt' : createdAt,
             'link' : link,
         };
     }
@@ -126,12 +126,12 @@ class 미추홀공지사항 extends SimpleTemplateStep {
         const a = card.locator('.td_subject > a');
         const link = await a.getAttribute('href');
         const title = (await a.textContent()).trim();
-        const createAt = SyncManager.parseDate((await card.locator('.td_date').textContent()).trim(), '-');
+        const createdAt = SyncManager.parseDate((await card.locator('.td_date').textContent()).trim(), '-');
 
         return {
             'id' : parseInt(id),
             'title' : title,
-            'createAt' : createAt,
+            'createdAt' : createdAt,
             'link' : link,
         };
     }
