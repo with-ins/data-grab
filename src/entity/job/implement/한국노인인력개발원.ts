@@ -1,7 +1,7 @@
 import {AbstractJob} from "../AbstractJob";
 import {SimpleTemplateStep} from "../../step/SimpleTemplateStep";
 import {Category} from "../../Category";
-import {Locator} from "@playwright/test";
+import {Locator} from "playwright";
 import {SyncManager} from "../../component/SyncManager";
 import {Optimize, Optimizer} from "../../Optimize";
 
