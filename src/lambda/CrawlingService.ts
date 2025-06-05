@@ -1,6 +1,8 @@
 import { chromium, Browser, Page } from 'playwright';
 import { JobProcessor } from '../entity/job/JobProcessor';
 import { S3Service } from './S3Service';
+import * as fs from 'fs';
+import * as path from 'path';
 
 export interface CrawlingResult {
     processedJobs: string[];
@@ -143,9 +145,6 @@ export class CrawlingService {
         
         // 로컬 환경에서는 파일로 저장
         if (process.env.NODE_ENV !== 'production') {
-            const fs = require('fs');
-            const path = require('path');
-            
             const dir = path.join(process.cwd(), 'output');
             if (!fs.existsSync(dir)) {
                 fs.mkdirSync(dir, { recursive: true });

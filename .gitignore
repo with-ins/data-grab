@@ -1,4 +1,3 @@
-
 # Playwright
 node_modules/
 /test-results/
@@ -6,9 +5,18 @@ node_modules/
 /blob-report/
 /playwright/.cache/
 
-/sync
+# Crawling results and temporary files
+/output/
+*.json
 results.json
+
+# Sync and configuration files
+/sync
+
+# Build and deployment
 dist/
 serverless.yml
 .serverless
+
+# Legacy files
 src/handler.ts
