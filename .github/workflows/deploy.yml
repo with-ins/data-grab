@@ -42,8 +42,8 @@ jobs:
           docker push $IMAGE_URI
           echo "image-uri=$IMAGE_URI" >> $GITHUB_OUTPUT
           
-      # - name: Deploy to Lambda
-      #   uses: int128/deploy-lambda-action@v1
-      #   with:
-      #     function-name: ${{ env.LAMBDA_FUNCTION_NAME }}
-      #     image-uri: ${{ steps.build-image.outputs.image-uri }}
+      - name: Deploy to Lambda
+        uses: int128/deploy-lambda-action@v1
+        with:
+          function-name: ${{ env.LAMBDA_FUNCTION_NAME }}
+          image-uri: ${{ steps.build-image.outputs.image-uri }}

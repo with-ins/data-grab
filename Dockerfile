@@ -31,8 +31,9 @@ WORKDIR ${LAMBDA_TASK_ROOT}
 COPY package*.json ./
 RUN npm ci --only=production
 
-# Playwright 브라우저 설치
-RUN npx playwright install chromium
+# Playwright 브라우저 설치 (headless shell 사용)
+RUN npx playwright install chromium-headless-shell
+RUN npx playwright install-deps chromium
 
 # 빌드된 파일들을 빌더 스테이지에서 복사
 COPY --from=builder /build/dist/ ./
