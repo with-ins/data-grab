@@ -38,7 +38,8 @@ jobs:
           IMAGE_TAG: ${{ github.sha }}
         run: |
           IMAGE_URI=$REGISTRY/$REPOSITORY:$IMAGE_TAG
-          docker build -t $IMAGE_URI .
+          # arm64 아키텍처로 빌드, AWS Lambda에서 비용이 저렴
+          docker build --platform linux/arm64 -t $IMAGE_URI .
           docker push $IMAGE_URI
           echo "image-uri=$IMAGE_URI" >> $GITHUB_OUTPUT
           
