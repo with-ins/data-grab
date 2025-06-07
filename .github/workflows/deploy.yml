@@ -47,5 +47,3 @@ jobs:
         with:
           function-name: ${{ env.LAMBDA_FUNCTION_NAME }}
           image-uri: ${{ steps.build-image.outputs.image-uri }}
-          memory-size: 1024
-          timeout: 300
