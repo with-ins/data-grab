@@ -1,5 +1,5 @@
 import {AbstractStep} from "../../../../step/AbstractStep";
-import {Page} from "@playwright/test";
+import {Page} from "playwright";
 import {SyncManager} from "../../../../component/SyncManager";
 import {Category} from "../../../../Category";
 

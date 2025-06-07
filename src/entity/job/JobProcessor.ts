@@ -18,7 +18,7 @@ import {한국노인인력개발원} from "./implement/한국노인인력개발�
 import {대한의료사회복지사협회} from "./implement/대한의료사회복지사협회";
 import {SyncManager} from "../component/SyncManager";
 import {FileManager} from "../component/FileManager";
-import {Page} from "@playwright/test";
+import {Page} from "playwright";
 
 
 export class JobProcessor {
@@ -39,11 +39,20 @@ export class JobProcessor {
         'complete': [],
     };
     syncDates : Record<string, string> = {};
+    private defaultSyncDate: string = '';
 
 
     loadFetchSync() {
         const json = SyncManager.loadFetchSync();
         this.syncDates = json['sync'];
+    }
+
+    setSyncDate(syncDate: string) {
+        this.defaultSyncDate = syncDate;
+        // 모든 job에 대해 동일한 syncDate 설정
+        this.jobs.forEach(job => {
+            this.syncDates[job.jobName] = syncDate;
+        });
     }
 
     // Symbol.iterator 구현

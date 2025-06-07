@@ -3,7 +3,7 @@
     "moduleResolution": "node",
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
-    "types": ["node", "@playwright/test"],  // 기존 유지
+    "types": ["node"],
     "target": "ES2020",
     "module": "commonjs",
     "outDir": "./dist",         // 빌드 출력 디렉토리 지정

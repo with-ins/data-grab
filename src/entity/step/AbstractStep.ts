@@ -1,5 +1,5 @@
 import {Step} from "./Step";
-import {Page} from "@playwright/test";
+import {Page} from "playwright";
 import {SyncManager} from "../component/SyncManager";
 
 export abstract class AbstractStep implements Step {
