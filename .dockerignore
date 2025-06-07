@@ -1,0 +1,16 @@
+node_modules
+dist
+output
+.git
+.github
+.idea
+tests
+*.log
+*.md
+.env*
+.DS_Store
+Thumbs.db
+*.iml
+.gitignore
+docker-compose.yml
+.dockerignore 

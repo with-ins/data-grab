@@ -17,6 +17,3 @@ results.json
 dist/
 serverless.yml
 .serverless
-
-# Legacy files
-src/handler.ts

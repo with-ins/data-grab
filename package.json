@@ -1,24 +1,18 @@
 {
   "name": "withins_playwright",
   "version": "1.0.0",
-  "description": "",
-  "main": "dist/handler.js",
+  "description": "AWS Lambda Crawler for Social Welfare Data",
   "scripts": {
     "build": "tsc",
     "deploy": "npm run build && serverless deploy",
-    "dev": "serverless offline start",
-    "test:local": "npm run build && node dist/lambda/local-test.js",
-    "test:legacy": "npx playwright test setup.spec.ts && npx playwright test withins.spec.ts && npx playwright test cleanup.spec.ts"
+    "deploy:dev": "npm run build && serverless deploy --stage dev"
   },
-  "keywords": [],
-  "author": "",
   "license": "ISC",
   "type": "commonjs",
   "devDependencies": {
     "@types/aws-lambda": "^8.10.149",
     "@types/node": "^22.15.18",
     "serverless": "^3.38.0",
-    "serverless-offline": "^12.0.4",
     "serverless-plugin-typescript": "^2.1.5",
     "typescript": "^5.8.3"
   },
