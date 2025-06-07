@@ -1,4 +1,4 @@
-name: Deploy Lambda with Docker
+name: dev-deploy-lambda
 
 on:
   push:
@@ -7,7 +7,8 @@ on:
 
 env:
   AWS_REGION: ap-northeast-2
-  ECR_REPO_NAME: withins-playwright-crawler
+  ECR_CRAWL_REPO_NAME: dev/crawl
+  LAMBDA_FUNCTION_NAME: withins-playwright-crawler
 
 jobs:
   deploy:
@@ -21,8 +22,8 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-access-key-id: ${{ secrets.AWS_ECR_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_ECR_SECRET_ACCESS_KEY_ID }}
           aws-region: ${{ env.AWS_REGION }}
           
       - name: Login to Amazon ECR
@@ -31,8 +32,12 @@ jobs:
         
       - name: Build and push Docker image
         id: build-image
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          REPOSITORY: ${{ env.ECR_CRAWL_REPO_NAME }}
+          IMAGE_TAG: ${{ github.sha }}
         run: |
-          IMAGE_URI=${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPO_NAME }}:${{ github.sha }}
+          IMAGE_URI=$REGISTRY/$REPOSITORY:$IMAGE_TAG
           docker build -t $IMAGE_URI .
           docker push $IMAGE_URI
           echo "image-uri=$IMAGE_URI" >> $GITHUB_OUTPUT
@@ -40,7 +45,7 @@ jobs:
       - name: Deploy to Lambda
         uses: int128/deploy-lambda-action@v1
         with:
-          function-name: withins-playwright-crawler
+          function-name: ${{ env.LAMBDA_FUNCTION_NAME }}
           image-uri: ${{ steps.build-image.outputs.image-uri }}
           memory-size: 1024
-          timeout: 900
+          timeout: 300
