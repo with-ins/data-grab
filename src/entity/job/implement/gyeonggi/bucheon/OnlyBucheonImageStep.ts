@@ -1,6 +1,6 @@
 import {AbstractStep} from "../../../../step/AbstractStep";
 import {Category} from "../../../../Category";
-import {Page} from "playwright";
+import {Page} from "playwright-core";
 import {SyncManager} from "../../../../component/SyncManager";
 
 

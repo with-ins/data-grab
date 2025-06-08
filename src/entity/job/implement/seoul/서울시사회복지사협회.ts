@@ -1,5 +1,5 @@
 import {AbstractJob} from "../../AbstractJob";
-import {Locator} from "playwright";
+import {Locator} from "playwright-core";
 import {SyncManager} from "../../../component/SyncManager";
 import {SimpleTemplateStep} from "../../../step/SimpleTemplateStep";
 import {Category} from "../../../Category";

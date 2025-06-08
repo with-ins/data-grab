@@ -1,4 +1,5 @@
-import { chromium, Browser, Page } from 'playwright';
+import { Browser, Page } from 'playwright-core';
+import playwrightAWS from 'playwright-aws-lambda';
 import { JobProcessor } from '../entity/job/JobProcessor';
 import { S3Service } from './S3Service';
 import * as fs from 'fs';
@@ -79,7 +80,7 @@ export class CrawlingService {
 
     private async initializeBrowser(): Promise<void> {
         console.log('Initializing browser...');
-        this.browser = await chromium.launch({
+        this.browser = await playwrightAWS.launchChromium({
             headless: true,
             args: [
                 '--no-sandbox',

@@ -18,7 +18,7 @@ import {한국노인인력개발원} from "./implement/한국노인인력개발�
 import {대한의료사회복지사협회} from "./implement/대한의료사회복지사협회";
 import {SyncManager} from "../component/SyncManager";
 import {FileManager} from "../component/FileManager";
-import {Page} from "playwright";
+import {Page} from "playwright-core";
 
 
 export class JobProcessor {

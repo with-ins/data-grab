@@ -1,6 +1,6 @@
 import {AbstractJob} from "../../AbstractJob";
 import {AbstractStep} from "../../../step/AbstractStep";
-import {Locator, Page} from "playwright";
+import {Locator, Page} from "playwright-core";
 import {SyncManager} from "../../../component/SyncManager";
 import {Category} from "../../../Category";
 import {Optimizer} from "../../../Optimize";

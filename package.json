@@ -3,22 +3,18 @@
   "version": "1.0.0",
   "description": "AWS Lambda Crawler for Social Welfare Data",
   "scripts": {
-    "build": "tsc",
-    "deploy": "npm run build && serverless deploy",
-    "deploy:dev": "npm run build && serverless deploy --stage dev"
+    "build": "tsc"
   },
   "license": "ISC",
   "type": "commonjs",
   "devDependencies": {
     "@types/aws-lambda": "^8.10.149",
     "@types/node": "^22.15.18",
-    "serverless": "^3.38.0",
-    "serverless-plugin-typescript": "^2.1.5",
     "typescript": "^5.8.3"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.824.0",
-    "playwright": "^1.52.0",
+    "playwright-aws-lambda": "^0.10.0",
     "playwright-core": "^1.52.0"
   }
 }

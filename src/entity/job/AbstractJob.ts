@@ -1,6 +1,6 @@
 import {Job} from "./Job";
 import {Step} from "../step/Step";
-import {Page} from "playwright";
+import {Page} from "playwright-core";
 import {SyncManager} from "../component/SyncManager";
 import {Optimize, Optimizer} from "../Optimize";
 

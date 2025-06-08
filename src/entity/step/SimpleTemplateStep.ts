@@ -1,5 +1,5 @@
 import {AbstractStep} from "./AbstractStep";
-import {Locator, Page} from "playwright";
+import {Locator, Page} from "playwright-core";
 import {Category} from "../Category";
 
 export abstract class SimpleTemplateStep extends AbstractStep {
