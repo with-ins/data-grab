@@ -8,7 +8,7 @@ export class S3Service {
         this.s3Client = new S3Client({
             region: process.env.AWS_REGION || 'ap-northeast-2'
         });
-        this.bucketName = process.env.S3_BUCKET_NAME || 'crawling-results-bucket';
+        this.bucketName = process.env.S3_BUCKET_NAME || 'crawl-json-bucket';
     }
 
     async uploadFile(key: string, data: string): Promise<string> {
