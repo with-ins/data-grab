@@ -167,18 +167,18 @@ export class CrawlingService {
         const jsonData = JSON.stringify(results, null, 2);
         
         // 로컬 환경에서는 파일로 저장
-        if (process.env.NODE_ENV !== 'production') {
-            const dir = path.join(process.cwd(), 'output');
-            if (!fs.existsSync(dir)) {
-                fs.mkdirSync(dir, { recursive: true });
-            }
+        // if (process.env.NODE_ENV !== 'production') {
+        //     const dir = path.join(process.cwd(), 'output');
+        //     if (!fs.existsSync(dir)) {
+        //         fs.mkdirSync(dir, { recursive: true });
+        //     }
             
-            const localPath = path.join(dir, `${timestamp}.json`);
-            fs.writeFileSync(localPath, jsonData);
+        //     const localPath = path.join(dir, `${timestamp}.json`);
+        //     fs.writeFileSync(localPath, jsonData);
             
-            console.log(`Results saved locally: ${localPath}`);
-            return localPath;
-        }
+        //     console.log(`Results saved locally: ${localPath}`);
+        //     return localPath;
+        // }
         
         // 프로덕션 환경에서는 S3에 업로드
         const location = await this.s3Service.uploadFile(fileName, jsonData);
