@@ -1,9 +1,11 @@
 import { Browser, Page } from 'playwright-core';
-import playwrightAWS from 'playwright-aws-lambda';
+import { chromium } from 'playwright-core';
 import { JobProcessor } from '../entity/job/JobProcessor';
 import { S3Service } from './S3Service';
 import * as fs from 'fs';
 import * as path from 'path';
+
+const chromiumBinary = require('@sparticuz/chromium');
 
 export interface CrawlingResult {
     processedJobs: string[];
@@ -80,15 +82,35 @@ export class CrawlingService {
 
     private async initializeBrowser(): Promise<void> {
         console.log('Initializing browser...');
-        this.browser = await playwrightAWS.launchChromium({
-            headless: true,
-            args: [
-                '--no-sandbox',
-                '--disable-dev-shm-usage',
-                '--disable-gpu',
-                '--disable-features=VizDisplayCompositor'
-            ]
-        });
+        try {
+            this.browser = await chromium.launch({
+                headless: true,
+                executablePath: await chromiumBinary.executablePath(),
+                args: [
+                    ...chromiumBinary.args,
+                    '--no-sandbox',
+                    '--disable-dev-shm-usage',
+                    '--disable-gpu',
+                    '--disable-features=VizDisplayCompositor',
+                    '--disable-background-timer-throttling',
+                    '--disable-backgrounding-occluded-windows',
+                    '--disable-renderer-backgrounding',
+                    '--disable-web-security',
+                    '--single-process',
+                    '--disable-setuid-sandbox',
+                    '--no-zygote',
+                    '--disable-accelerated-2d-canvas',
+                    '--no-first-run',
+                    '--no-default-browser-check',
+                    '--disable-extensions',
+                    '--disable-plugins'
+                ]
+            });
+            console.log('Browser initialized successfully');
+        } catch (error) {
+            console.error('Failed to initialize browser:', error);
+            throw error;
+        }
     }
 
     private async createNewPage(): Promise<Page> {
