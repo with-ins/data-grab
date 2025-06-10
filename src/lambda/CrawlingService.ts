@@ -4,6 +4,7 @@ import { JobProcessor } from '../entity/job/JobProcessor';
 import { S3Service } from './S3Service';
 import * as fs from 'fs';
 import * as path from 'path';
+import { getKoreaTimeISO } from '../utils/TimeUtils';
 
 const chromiumBinary = require('@sparticuz/chromium');
 
@@ -21,32 +22,32 @@ export class CrawlingService {
         this.s3Service = new S3Service();
     }
 
-    async executeCrawling(syncDate: string, jobName?: string): Promise<CrawlingResult> {
+    async executeCrawling(targetDate: string, jobName?: string): Promise<CrawlingResult> {
         const startTime = Date.now();
-        console.log(`Crawling started at ${new Date().toISOString()}`);
+        console.log(`크롤링 시작 at ${getKoreaTimeISO()}`);
 
         try {
             // Playwright 브라우저 초기화
             await this.initializeBrowser();
             
-            const processor = new JobProcessor();
+            const jobProcessor = new JobProcessor();
             // 외부 API 대신 매개변수로 받은 syncDate 사용
-            processor.setSyncDate(syncDate);
+            jobProcessor.setSyncDate(targetDate);
             
             const processedJobs: string[] = [];
             const allResults: any[] = [];
 
             // 특정 job만 실행하거나 전체 실행
             const jobsToProcess = jobName 
-                ? processor.jobs.filter(job => job.jobName === jobName)
-                : processor.jobs;
+                ? jobProcessor.jobs.filter(job => job.jobName === jobName)
+                : jobProcessor.jobs;
 
             for (const job of jobsToProcess) {
                 console.log(`Processing job: ${job.jobName}`);
                 
                 try {
                     const page = await this.createNewPage();
-                    const parsedSyncDate = this.parseDate(syncDate);
+                    const parsedSyncDate = this.parseDate(targetDate);
                     const result = await job.run(page, parsedSyncDate);
                     
                     // Spring Batch JsonItemReader 형태로 변환
@@ -64,7 +65,7 @@ export class CrawlingService {
             }
 
             // S3에 결과 업로드
-            const s3Location = await this.uploadResultsToS3(allResults, syncDate);
+            const s3Location = await this.uploadResultsToS3(allResults, targetDate);
             
             const endTime = Date.now();
             console.log(`Crawling completed in ${endTime - startTime}ms`);

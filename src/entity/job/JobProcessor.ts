@@ -47,11 +47,11 @@ export class JobProcessor {
         this.syncDates = json['sync'];
     }
 
-    setSyncDate(syncDate: string) {
-        this.defaultSyncDate = syncDate;
+    setSyncDate(targetDate: string) {
+        this.defaultSyncDate = targetDate;
         // 모든 job에 대해 동일한 syncDate 설정
         this.jobs.forEach(job => {
-            this.syncDates[job.jobName] = syncDate;
+            this.syncDates[job.jobName] = targetDate;
         });
     }
 

@@ -17,8 +17,7 @@ export class S3Service {
                 Bucket: this.bucketName,
                 Key: key,
                 Body: data,
-                ContentType: 'application/json',
-                ServerSideEncryption: 'AES256'
+                ContentType: 'application/json'
             });
 
             await this.s3Client.send(command);
