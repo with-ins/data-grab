@@ -1,6 +1,6 @@
 import {Step} from "./Step";
 import {Page} from "playwright-core";
-import {SyncManager} from "../component/SyncManager";
+import {DateUtils} from "../../utils/DateUtils";
 
 export abstract class AbstractStep implements Step {
 
@@ -16,7 +16,7 @@ export abstract class AbstractStep implements Step {
 
         for (const [key, value] of Object.entries(result)) {
             // 배열 내부 객체들을 필터링
-            const filtered = value.filter(item => SyncManager.isDateAfter(syncDate, item.createdAt));
+            const filtered = value.filter(item => DateUtils.isDateAfter(syncDate, item.createdAt));
 
             if (filtered.length > 0) {
                 result[key] = filtered;

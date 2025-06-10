@@ -16,10 +16,6 @@ import {인천광역시사회복지사협회} from "./implement/incheon/인천�
 import {경기도사회복지사협회} from "./implement/gyeonggi/경기도사회복지사협회";
 import {한국노인인력개발원} from "./implement/한국노인인력개발원";
 import {대한의료사회복지사협회} from "./implement/대한의료사회복지사협회";
-import {SyncManager} from "../component/SyncManager";
-import {FileManager} from "../component/FileManager";
-import {Page} from "playwright-core";
-
 
 export class JobProcessor {
     jobs: Job[] = [
@@ -41,12 +37,6 @@ export class JobProcessor {
     syncDates : Record<string, string> = {};
     private defaultSyncDate: string = '';
 
-
-    loadFetchSync() {
-        const json = SyncManager.loadFetchSync();
-        this.syncDates = json['sync'];
-    }
-
     setSyncDate(targetDate: string) {
         this.defaultSyncDate = targetDate;
         // 모든 job에 대해 동일한 syncDate 설정
@@ -60,11 +50,5 @@ export class JobProcessor {
         for (const job of this.jobs) {
             yield job;
         }
-    }
-
-    async runner(page: Page, job: Job) {
-        const syncDate = SyncManager.parseDate(this.syncDates[job.jobName]);
-        const result = await job.run(page, syncDate);
-        SyncManager.save(job.jobName, result);
     }
 }

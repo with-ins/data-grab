@@ -1,6 +1,6 @@
 import { Context } from 'aws-lambda';
 import { CrawlingService } from './CrawlingService';
-import { getKoreaTimeISO } from '../utils/TimeUtils';
+import { DateUtils } from '../utils/DateUtils';
 
 // Lambda Invocation용 이벤트 인터페이스
 export interface CrawlingEvent {
@@ -57,7 +57,7 @@ export const crawl = async (
                 itemCount: result.itemCount,
                 duration
             },
-            timestamp: getKoreaTimeISO()
+            timestamp: DateUtils.getKoreaTimeISO()
         };
         
         console.log('크롤링 성공', {
@@ -83,7 +83,7 @@ export const crawl = async (
             success: false,
             message: '크롤링 실패',
             error: errorMessage,
-            timestamp: getKoreaTimeISO()
+            timestamp: DateUtils.getKoreaTimeISO()
         };
     }
 };

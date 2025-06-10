@@ -4,7 +4,7 @@ import { JobProcessor } from '../entity/job/JobProcessor';
 import { S3Service } from './S3Service';
 import * as fs from 'fs';
 import * as path from 'path';
-import { getKoreaTimeISO } from '../utils/TimeUtils';
+import { DateUtils } from '../utils/DateUtils';
 
 const chromiumBinary = require('@sparticuz/chromium');
 
@@ -24,7 +24,7 @@ export class CrawlingService {
 
     async executeCrawling(targetDate: string, jobName?: string): Promise<CrawlingResult> {
         const startTime = Date.now();
-        console.log(`크롤링 시작 at ${getKoreaTimeISO()}`);
+        console.log(`크롤링 시작 at ${DateUtils.getKoreaTimeISO()}`);
 
         try {
             // Playwright 브라우저 초기화

@@ -1,0 +1,62 @@
+version: '3.8'
+
+services:
+  lambda-crawler:
+    # 로컬 테스트용 Dockerfile 사용
+    build:
+      context: .
+      dockerfile: Dockerfile.local
+    environment:
+      - AWS_REGION=ap-northeast-2
+      - S3_BUCKET_NAME=crawl-json-bucket
+      - NODE_ENV=development
+      - LAMBDA_VERSION=1.0.0-local
+      # AWS SDK가 MinIO를 S3로 인식하도록 하는 환경변수들
+      - AWS_ENDPOINT_URL=http://minio:9000
+      - AWS_ACCESS_KEY_ID=minioadmin
+      - AWS_SECRET_ACCESS_KEY=minioadmin
+      - AWS_S3_FORCE_PATH_STYLE=true
+      # AWS SDK v3를 위한 추가 설정
+      - AWS_S3_USE_PATH_STYLE_ENDPOINT=true
+    volumes:
+      - ./output:/var/task/output
+    ports:
+      - "9000:8080"
+    command: ["lambda/handler.crawl"]
+    depends_on:
+      - minio
+    
+  # S3 대신 MinIO 사용 (로컬 스토리지)
+  minio:
+    image: minio/minio:latest
+    ports:
+      - "9001:9000"      # MinIO API 포트
+      - "9002:9001"      # MinIO Console 포트 (웹 UI)
+    environment:
+      - MINIO_ROOT_USER=minioadmin
+      - MINIO_ROOT_PASSWORD=minioadmin
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+
+  # MinIO 버킷 자동 생성을 위한 초기화 컨테이너
+  minio-init:
+    image: minio/mc:latest
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c "
+      sleep 10;
+      /usr/bin/mc alias set myminio http://minio:9000 minioadmin minioadmin;
+      /usr/bin/mc mb myminio/crawl-json-bucket --ignore-existing;
+      /usr/bin/mc anonymous set public myminio/crawl-json-bucket;
+      echo 'MinIO bucket setup completed';
+      "
+
+volumes:
+  minio_data: 
