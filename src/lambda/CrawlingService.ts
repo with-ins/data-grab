@@ -1,6 +1,6 @@
 import { Browser, Page } from 'playwright-core';
 import { chromium } from 'playwright-core';
-import { JobProcessor } from '../entity/job/JobProcessor';
+import { JobRegistry } from '../entity/job/JobRegistry';
 import { S3Service } from './S3Service';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -22,7 +22,7 @@ export class CrawlingService {
         this.s3Service = new S3Service();
     }
 
-    async executeCrawling(targetDate: string, jobName?: string): Promise<CrawlingResult> {
+    async executeCrawling(targetDate: string, jobName: string): Promise<CrawlingResult> {
         const startTime = Date.now();
         console.log(`크롤링 시작 at ${DateUtils.getKoreaTimeISO()}`);
 
@@ -30,38 +30,33 @@ export class CrawlingService {
             // Playwright 브라우저 초기화
             await this.initializeBrowser();
             
-            const jobProcessor = new JobProcessor();
-            // 외부 API 대신 매개변수로 받은 syncDate 사용
-            jobProcessor.setSyncDate(targetDate);
-            
             const processedJobs: string[] = [];
             const allResults: any[] = [];
 
-            // 특정 job만 실행하거나 전체 실행
-            const jobsToProcess = jobName 
-                ? jobProcessor.jobs.filter(job => job.jobName === jobName)
-                : jobProcessor.jobs;
+            // 특정 job만 가져오기
+            const job = JobRegistry.getJobByName(jobName);
+            if (!job) {
+                throw new Error(`Job not found: ${jobName}. Available jobs: ${JobRegistry.getJobNames().join(', ')}`);
+            }
 
-            for (const job of jobsToProcess) {
-                console.log(`Processing job: ${job.jobName}`);
+            console.log(`Processing single job: ${job.jobName}`);
+
+            try {
+                const page = await this.createNewPage();
+                const parsedSyncDate = this.parseDate(targetDate);
+                const result = await job.run(page, parsedSyncDate);
                 
-                try {
-                    const page = await this.createNewPage();
-                    const parsedSyncDate = this.parseDate(targetDate);
-                    const result = await job.run(page, parsedSyncDate);
-                    
-                    // Spring Batch JsonItemReader 형태로 변환
-                    const flatResults = this.transformToFlatArray(result, job.jobName);
-                    allResults.push(...flatResults);
-                    
-                    processedJobs.push(job.jobName);
-                    console.log(`Completed job: ${job.jobName}, items: ${flatResults.length}`);
-                    
-                    await page.close();
-                } catch (error) {
-                    console.error(`Error processing job ${job.jobName}:`, error);
-                    // 개별 job 실패시에도 다른 job은 계속 진행
-                }
+                // Spring Batch JsonItemReader 형태로 변환
+                const flatResults = this.transformToFlatArray(result, job.jobName);
+                allResults.push(...flatResults);
+                
+                processedJobs.push(job.jobName);
+                console.log(`Completed job: ${job.jobName}, items: ${flatResults.length}`);
+                
+                await page.close();
+            } catch (error) {
+                console.error(`Error processing job ${job.jobName}:`, error);
+                throw error; // 단일 job이므로 실패시 전체 실패로 처리
             }
 
             // S3에 결과 업로드
