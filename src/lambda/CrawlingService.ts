@@ -1,6 +1,8 @@
 import { Browser, Page } from 'playwright-core';
 import { chromium } from 'playwright-core';
 import { JobRegistry } from '../entity/job/JobRegistry';
+import { Job } from '../entity/job/Job';
+import { JobExecutor, ExecutionContext, JobExecutionResult } from '../entity/job/JobExecutor';
 import { S3Service } from './S3Service';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -17,6 +19,7 @@ export interface CrawlingResult {
 export class CrawlingService {
     private browser: Browser | null = null;
     private s3Service: S3Service;
+    private jobExecutor: JobExecutor | null = null;
 
     constructor() {
         this.s3Service = new S3Service();
@@ -27,53 +30,51 @@ export class CrawlingService {
         console.log(`크롤링 시작 at ${DateUtils.getKoreaTimeISO()}`);
 
         try {
-            // Playwright 브라우저 초기화
             await this.initializeBrowser();
             
-            const processedJobs: string[] = [];
-            const allResults: any[] = [];
-
-            // 특정 job만 가져오기
-            const job = JobRegistry.getJobByName(jobName);
-            if (!job) {
-                throw new Error(`Job not found: ${jobName}. Available jobs: ${JobRegistry.getJobNames().join(', ')}`);
-            }
-
-            console.log(`Processing single job: ${job.jobName}`);
-
-            try {
-                const page = await this.createNewPage();
-                const parsedSyncDate = this.parseDate(targetDate);
-                const result = await job.run(page, parsedSyncDate);
-                
-                // Spring Batch JsonItemReader 형태로 변환
-                const flatResults = this.transformToFlatArray(result, job.jobName);
-                allResults.push(...flatResults);
-                
-                processedJobs.push(job.jobName);
-                console.log(`Completed job: ${job.jobName}, items: ${flatResults.length}`);
-                
-                await page.close();
-            } catch (error) {
-                console.error(`Error processing job ${job.jobName}:`, error);
-                throw error; // 단일 job이므로 실패시 전체 실패로 처리
-            }
-
-            // S3에 결과 업로드
-            const s3Location = await this.uploadResultsToS3(allResults, targetDate);
+            // JobExecutor 생성 (브라우저 의존성 주입)
+            this.jobExecutor = new JobExecutor(this.browser!);
+            
+            const job = this.findJob(jobName);
+            
+            // Job 실행을 JobExecutor에 위임
+            const jobResult = await this.jobExecutor.execute(job, {
+                targetDate: this.parseDate(targetDate)
+            });
+            
+            const s3Location = await this.uploadResults(jobResult.results, targetDate);
             
             const endTime = Date.now();
             console.log(`Crawling completed in ${endTime - startTime}ms`);
 
-            return {
-                processedJobs,
-                s3Location,
-                itemCount: allResults.length
-            };
+            return this.createCrawlingResult(jobResult.processedJobs, s3Location, jobResult.itemCount);
 
         } finally {
             await this.cleanup();
         }
+    }
+
+    private findJob(jobName: string): Job {
+        const job = JobRegistry.getJobByName(jobName);
+        if (!job) {
+            throw new Error(`Job not found: ${jobName}. Available jobs: ${JobRegistry.getJobNames().join(', ')}`);
+        }
+        console.log(`Found job: ${job.jobName}`);
+        return job;
+    }
+
+
+
+    private async uploadResults(results: any[], targetDate: string): Promise<string> {
+        return await this.uploadResultsToS3(results, targetDate);
+    }
+
+    private createCrawlingResult(processedJobs: string[], s3Location: string, itemCount: number): CrawlingResult {
+        return {
+            processedJobs,
+            s3Location,
+            itemCount
+        };
     }
 
     private async initializeBrowser(): Promise<void> {
@@ -109,15 +110,7 @@ export class CrawlingService {
         }
     }
 
-    private async createNewPage(): Promise<Page> {
-        if (!this.browser) {
-            throw new Error('Browser not initialized');
-        }
-        
-        const page = await this.browser.newPage();
-        await page.setViewportSize({ width: 1280, height: 720 });
-        return page;
-    }
+
 
     private parseDate(dateString: string): Date {
         const date = new Date(dateString);
@@ -127,34 +120,7 @@ export class CrawlingService {
         return date;
     }
 
-    /**
-     * 기존 중첩 구조를 Spring Batch JsonItemReader가 읽을 수 있는 평면 배열로 변환
-     * 기존: { '기관명': { 'notice': [...], 'recruit': [...] } }
-     * 변환: [{ jobName: '기관명', category: 'notice', ...item }, ...]
-     */
-    private transformToFlatArray(result: Record<string, any[]>, jobName: string): any[] {
-        const flatResults: any[] = [];
-        
-        for (const [institutionName, categories] of Object.entries(result)) {
-            if (typeof categories === 'object' && categories !== null) {
-                for (const [category, items] of Object.entries(categories)) {
-                    if (Array.isArray(items)) {
-                        items.forEach(item => {
-                            flatResults.push({
-                                jobName,
-                                institutionName,
-                                category,
-                                crawledAt: new Date().toISOString(),
-                                ...item
-                            });
-                        });
-                    }
-                }
-            }
-        }
-        
-        return flatResults;
-    }
+
 
     private async uploadResultsToS3(results: any[], syncDate: string): Promise<string> {
         const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
@@ -183,6 +149,7 @@ export class CrawlingService {
     }
 
     private async cleanup(): Promise<void> {
+        this.jobExecutor = null; // JobExecutor 참조 제거
         if (this.browser) {
             await this.browser.close();
             this.browser = null;

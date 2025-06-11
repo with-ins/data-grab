@@ -47,18 +47,14 @@ curl -XPOST "http://localhost:9000/2015-03-31/functions/function/invocations" \
   -H "Content-Type: application/json" \
   -d '{
     "syncDate": "2024-01-15",
-    "jobName": "오정노인복지관",
-    "batchJobId": "test-batch-001",
-    "requestId": "test-request-001"
+    "jobName": "오정노인복지관"
   }'
 
 # 전체 Job 크롤링 테스트
 curl -XPOST "http://localhost:9000/2015-03-31/functions/function/invocations" \
   -H "Content-Type: application/json" \
   -d '{
-    "syncDate": "2024-01-15",
-    "batchJobId": "test-batch-002",
-    "requestId": "test-request-002"
+    "syncDate": "2024-01-15"
   }'
 
 # 입력 검증 테스트 (실패 예상)
