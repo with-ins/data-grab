@@ -2,7 +2,7 @@ import {AbstractJob} from "../../AbstractJob";
 import {SimpleTemplateStep} from "../../../step/SimpleTemplateStep";
 import {Locator, Page} from "playwright-core";
 import {Category} from "../../../Category";
-import {DateUtils} from "../../../../utils/DateUtils";
+import {parseDate, isDateAfter} from "../../../../utils/DateUtils";
 import {AbstractStep} from "../../../step/AbstractStep";
 import {Optimize, Optimizer} from "../../../Optimize";
 
@@ -63,9 +63,9 @@ class 미추홀소식 extends AbstractStep {
             let dateStr =  (await page.locator('.panel-heading .pull-right span:first-child').textContent()).trim();
             // 2025-05-15
             dateStr = ('20' + dateStr).slice(0, 10)
-            const createdAt = DateUtils.parseDate(dateStr, '-');
+            const createdAt = parseDate(dateStr, '-');
 
-            if (!DateUtils.isDateAfter(syncDate, createdAt)) break;
+            if (!isDateAfter(syncDate, createdAt)) break;
 
             list.push({
                 'id' : parseInt(id),
@@ -98,7 +98,7 @@ class 미추홀채용 extends SimpleTemplateStep {
         const a = card.locator('.td_subject > a');
         const link = await a.getAttribute('href');
         const title = (await a.textContent()).trim();
-        const createdAt = DateUtils.parseDate((await card.locator('.td_date').textContent()).trim(), '-');
+        const createdAt = parseDate((await card.locator('.td_date').textContent()).trim(), '-');
 
         return {
             'id' : parseInt(id),
@@ -126,7 +126,7 @@ class 미추홀공지사항 extends SimpleTemplateStep {
         const a = card.locator('.td_subject > a');
         const link = await a.getAttribute('href');
         const title = (await a.textContent()).trim();
-        const createdAt = DateUtils.parseDate((await card.locator('.td_date').textContent()).trim(), '-');
+        const createdAt = parseDate((await card.locator('.td_date').textContent()).trim(), '-');
 
         return {
             'id' : parseInt(id),

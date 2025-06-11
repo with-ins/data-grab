@@ -4,7 +4,7 @@ import { JobRegistry } from '../entity/job/JobRegistry';
 import { Job } from '../entity/job/Job';
 import { JobExecutor } from '../entity/job/JobExecutor';
 import { S3Uploader } from '../uploader/S3Uploader';
-import { DateUtils } from '../utils/DateUtils';
+import { getKoreaTimeISO } from '../utils/DateUtils';
 
 const chromiumBinary = require('@sparticuz/chromium');
 
@@ -25,7 +25,7 @@ export class CrawlingService {
 
     async executeCrawling(targetDate: string, jobName: string): Promise<CrawlingResult> {
         const startTime = Date.now();
-        console.log(`크롤링 시작 at ${DateUtils.getKoreaTimeISO()}`);
+        console.log(`크롤링 시작 at ${getKoreaTimeISO()}`);
 
         try {
             await this.initializeBrowser();
@@ -63,10 +63,6 @@ export class CrawlingService {
         console.log(`Found job: ${job.jobName}`);
         return job;
     }
-
-
-
-
 
     private createCrawlingResult(processedJobs: string[], s3Location: string, itemCount: number): CrawlingResult {
         return {
@@ -109,8 +105,6 @@ export class CrawlingService {
         }
     }
 
-
-
     private parseDate(dateString: string): Date {
         const date = new Date(dateString);
         if (isNaN(date.getTime())) {
@@ -118,10 +112,6 @@ export class CrawlingService {
         }
         return date;
     }
-
-
-
-
 
     private async cleanup(): Promise<void> {
         this.jobExecutor = null; // JobExecutor 참조 제거

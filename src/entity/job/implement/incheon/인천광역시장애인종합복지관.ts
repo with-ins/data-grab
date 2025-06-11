@@ -2,7 +2,7 @@ import {AbstractJob} from "../../AbstractJob";
 import {SimpleTemplateStep} from "../../../step/SimpleTemplateStep";
 import {Locator} from "playwright-core";
 import {Category} from "../../../Category";
-import {DateUtils} from "../../../../utils/DateUtils";
+import {parseDate} from "../../../../utils/DateUtils";
 import {Optimize, Optimizer} from "../../../Optimize";
 
 export class 인천광역시장애인종합복지관 extends AbstractJob {
@@ -41,7 +41,7 @@ class 인천채용 extends SimpleTemplateStep {
 
         let dateStr = (await card.locator('.wr-date').textContent()).trim();
 
-        const createdAt = DateUtils.parseDate(this.getStartDate(dateStr));
+        const createdAt = parseDate(this.getStartDate(dateStr));
 
         return {
             'id' : parseInt(id),
@@ -94,7 +94,7 @@ class 인천이벤트 extends SimpleTemplateStep {
     convertToDateFormat(timeString: string): Date {
         // 이미 yyyy.MM.dd 형식이면 그대로 반환
         if (/^\d{4}\.\d{2}\.\d{2}$/.test(timeString)) {
-            return DateUtils.parseDate(timeString, '.');
+            return parseDate(timeString, '.');
         }
 
         const now = new Date();
@@ -114,7 +114,7 @@ class 인천이벤트 extends SimpleTemplateStep {
             }
         }
 
-        return DateUtils.parseDate(timeString, '.');
+        return parseDate(timeString, '.');
     }
 }
 class 인천공지사항 extends SimpleTemplateStep {
@@ -141,7 +141,7 @@ class 인천공지사항 extends SimpleTemplateStep {
         } else {
             let createdAtStr = (await card.locator('.wr-date').textContent()).trim() // 05.01
             createdAtStr = this.inferYearFromDate(createdAtStr) // 2025.05.01
-            createdAt = DateUtils.parseDate(createdAtStr, '.')
+            createdAt = parseDate(createdAtStr, '.')
         }
 
         return {

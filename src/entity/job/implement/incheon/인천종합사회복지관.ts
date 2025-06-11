@@ -1,7 +1,7 @@
 import {AbstractJob} from "../../AbstractJob";
 import {AbstractStep} from "../../../step/AbstractStep";
 import {Locator, Page} from "playwright-core";
-import {DateUtils} from "../../../../utils/DateUtils";
+import {parseDate} from "../../../../utils/DateUtils";
 import {Category} from "../../../Category";
 import {Optimizer} from "../../../Optimize";
 
@@ -44,7 +44,7 @@ class IncheonWelfare extends AbstractStep {
             const pText = (await card.locator('p.mdDefaultW100.mdTextOverflow2.mdWzSsbj').textContent()).trim();
             const dateMatch = pText.match(/\d{4}\.\d{2}\.\d{2}/);
             const date = dateMatch ? dateMatch[0] : null;
-            const createdAt = DateUtils.parseDate(date, '.');
+            const createdAt = parseDate(date, '.');
 
             list.push({
                 'id' : Number(id),
@@ -86,7 +86,7 @@ class IncheonEvent extends AbstractStep {
             const pText = (await card.locator('p.mdDefaultW100.mdTextOverflow2.mdWzSsbj').textContent()).trim();
             const dateMatch = pText.match(/\d{4}\.\d{2}\.\d{2}/);
             const date = dateMatch ? dateMatch[0] : null;
-            const createdAt = DateUtils.parseDate(date, '.');
+            const createdAt = parseDate(date, '.');
 
             list.push({
                 'id' : Number(id),
@@ -127,7 +127,7 @@ class IncheonNotice extends AbstractStep {
             const title = await titleBox.textContent();
             const link = baseUrl + (await titleBox.getAttribute('href'))
 
-            const createdAt : Date = DateUtils.parseDate((await card.locator('.jDate').textContent()).trim(), '.');
+            const createdAt : Date = parseDate((await card.locator('.jDate').textContent()).trim(), '.');
 
             list.push({
                 'id' : Number(id),

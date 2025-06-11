@@ -2,7 +2,7 @@ import {AbstractJob} from "../AbstractJob";
 import {SimpleTemplateStep} from "../../step/SimpleTemplateStep";
 import {Category} from "../../Category";
 import {Locator} from "playwright-core";
-import {DateUtils} from "../../../utils/DateUtils";
+import {parseDate} from "../../../utils/DateUtils";
 import {Optimize, Optimizer} from "../../Optimize";
 
 export class 한국노인인력개발원 extends AbstractJob {
@@ -41,7 +41,7 @@ class 공지사항 extends SimpleTemplateStep {
         const title = (await a.textContent()).trim()
 
         const dateStr = (await card.locator('td:nth-child(5)').textContent()).trim();
-        const createdAt = DateUtils.parseDate(dateStr, '.');
+        const createdAt = parseDate(dateStr, '.');
 
         return {
             'id' : parseInt(id),
@@ -69,7 +69,7 @@ class 채용 extends SimpleTemplateStep {
         const title = (await a.textContent()).trim()
 
         const dateStr = (await card.locator('td:nth-child(5)').textContent()).trim();
-        const createdAt = DateUtils.parseDate(dateStr, '.');
+        const createdAt = parseDate(dateStr, '.');
 
         return {
             'id' : parseInt(id),

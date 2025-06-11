@@ -1,7 +1,7 @@
 import {AbstractStep} from "../../../../step/AbstractStep";
 import {Category} from "../../../../Category";
 import {Page} from "playwright-core";
-import {DateUtils} from "../../../../../utils/DateUtils";
+import {parseDate, isDateAfter} from "../../../../../utils/DateUtils";
 
 
 export class OnlyBucheonImageStep extends AbstractStep {
@@ -38,9 +38,9 @@ export class OnlyBucheonImageStep extends AbstractStep {
             });
 
             let dateStr = (await page.locator('.board_v_title > ul > li:nth-child(1) > span:nth-child(2)').textContent()).trim().slice(0, 10)
-            const createdAt = DateUtils.parseDate(dateStr)
+            const createdAt = parseDate(dateStr)
 
-            if (!DateUtils.isDateAfter(syncDate, createdAt)) {
+            if (!isDateAfter(syncDate, createdAt)) {
                 break;
             }
 
