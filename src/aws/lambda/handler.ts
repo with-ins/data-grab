@@ -1,6 +1,6 @@
 import { Context } from 'aws-lambda';
 import { CrawlingService } from './CrawlingService';
-import { getKoreaTimeISO } from '../utils/DateUtils';
+import { getKoreaTimeISO } from '../../utils/DateUtils';
 
 // Lambda Invocation용 이벤트 인터페이스
 export interface CrawlingEvent {

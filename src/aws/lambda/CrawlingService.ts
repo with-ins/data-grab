@@ -1,10 +1,10 @@
 import { Browser } from 'playwright-core';
 import { chromium } from 'playwright-core';
-import { JobRegistry } from '../entity/job/JobRegistry';
-import { Job } from '../entity/job/Job';
-import { JobExecutor } from '../entity/job/JobExecutor';
-import { S3Uploader } from '../uploader/S3Uploader';
-import { getKoreaTimeISO } from '../utils/DateUtils';
+import { JobRegistry } from '../../entity/job/JobRegistry';
+import { Job } from '../../entity/job/Job';
+import { JobExecutor } from '../../entity/job/JobExecutor';
+import { S3Uploader } from '../s3/S3Uploader';
+import { getKoreaTimeISO } from '../../utils/DateUtils';
 
 const chromiumBinary = require('@sparticuz/chromium');
 

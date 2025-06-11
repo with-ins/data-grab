@@ -22,7 +22,7 @@ services:
       - ./output:/var/task/output
     ports:
       - "9000:8080"
-    command: ["lambda/handler.crawl"]
+    command: ["aws/lambda/handler.crawl"]
     depends_on:
       - minio
     
