@@ -1,11 +1,9 @@
-import { Browser, Page } from 'playwright-core';
+import { Browser } from 'playwright-core';
 import { chromium } from 'playwright-core';
 import { JobRegistry } from '../entity/job/JobRegistry';
 import { Job } from '../entity/job/Job';
-import { JobExecutor, ExecutionContext, JobExecutionResult } from '../entity/job/JobExecutor';
-import { S3Service } from './S3Service';
-import * as fs from 'fs';
-import * as path from 'path';
+import { JobExecutor } from '../entity/job/JobExecutor';
+import { S3Uploader } from '../uploader/S3Uploader';
 import { DateUtils } from '../utils/DateUtils';
 
 const chromiumBinary = require('@sparticuz/chromium');
@@ -18,11 +16,11 @@ export interface CrawlingResult {
 
 export class CrawlingService {
     private browser: Browser | null = null;
-    private s3Service: S3Service;
+    private s3Uploader: S3Uploader;
     private jobExecutor: JobExecutor | null = null;
 
     constructor() {
-        this.s3Service = new S3Service();
+        this.s3Uploader = new S3Uploader();
     }
 
     async executeCrawling(targetDate: string, jobName: string): Promise<CrawlingResult> {
@@ -42,7 +40,10 @@ export class CrawlingService {
                 targetDate: this.parseDate(targetDate)
             });
             
-            const s3Location = await this.uploadResults(jobResult.results, targetDate);
+            const s3Location = await this.s3Uploader.uploadCrawlingResults(jobResult.results, { 
+                targetDate, 
+                jobName 
+            });
             
             const endTime = Date.now();
             console.log(`Crawling completed in ${endTime - startTime}ms`);
@@ -65,9 +66,7 @@ export class CrawlingService {
 
 
 
-    private async uploadResults(results: any[], targetDate: string): Promise<string> {
-        return await this.uploadResultsToS3(results, targetDate);
-    }
+
 
     private createCrawlingResult(processedJobs: string[], s3Location: string, itemCount: number): CrawlingResult {
         return {
@@ -122,31 +121,7 @@ export class CrawlingService {
 
 
 
-    private async uploadResultsToS3(results: any[], syncDate: string): Promise<string> {
-        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-        const fileName = `crawling-results/${syncDate}/${timestamp}.json`;
-        
-        const jsonData = JSON.stringify(results, null, 2);
-        
-        // 로컬 환경에서는 파일로 저장
-        // if (process.env.NODE_ENV !== 'production') {
-        //     const dir = path.join(process.cwd(), 'output');
-        //     if (!fs.existsSync(dir)) {
-        //         fs.mkdirSync(dir, { recursive: true });
-        //     }
-            
-        //     const localPath = path.join(dir, `${timestamp}.json`);
-        //     fs.writeFileSync(localPath, jsonData);
-            
-        //     console.log(`Results saved locally: ${localPath}`);
-        //     return localPath;
-        // }
-        
-        // 프로덕션 환경에서는 S3에 업로드
-        const location = await this.s3Service.uploadFile(fileName, jsonData);
-        console.log(`Results uploaded to S3: ${location}`);
-        return location;
-    }
+
 
     private async cleanup(): Promise<void> {
         this.jobExecutor = null; // JobExecutor 참조 제거
