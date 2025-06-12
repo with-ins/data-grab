@@ -5,6 +5,7 @@ import { Job } from '../../entity/job/Job';
 import { JobExecutor } from '../../entity/job/JobExecutor';
 import { S3Uploader } from '../s3/S3Uploader';
 import { getKoreaTimeISO } from '../../utils/DateUtils';
+import { Result, withErrorHandling, withSyncErrorHandling, isSuccess, isFailure } from '../../utils/ErrorHandling';
 
 const chromiumBinary = require('@sparticuz/chromium');
 
@@ -23,58 +24,101 @@ export class CrawlingService {
         this.s3Uploader = new S3Uploader();
     }
 
-    async executeCrawling(targetDate: string, jobName: string): Promise<CrawlingResult> {
+    async executeCrawling(targetDate: string, jobName: string): Promise<Result<CrawlingResult>> {
         const startTime = Date.now();
         console.log(`크롤링 시작 at ${getKoreaTimeISO()}`);
 
         try {
-            await this.initializeBrowser();
-            
-            // JobExecutor 생성 (브라우저 의존성 주입)
+            // 1단계: 브라우저 초기화
+            const browserResult = await this.initializeBrowserSafely();
+            if (isFailure(browserResult)) {
+                return {
+                    success: false,
+                    error: new Error(`브라우저 초기화 실패: ${browserResult.error.message}`),
+                    context: 'Browser initialization'
+                };
+            }
+
+            // 2단계: Job 찾기
+            const jobResult = this.findJobSafely(jobName);
+            if (isFailure(jobResult)) {
+                return {
+                    success: false,
+                    error: jobResult.error,
+                    context: 'Job lookup'
+                };
+            }
+
+            // 3단계: 날짜 파싱
+            const dateResult = this.parseDateSafely(targetDate);
+            if (isFailure(dateResult)) {
+                return {
+                    success: false,
+                    error: dateResult.error,
+                    context: 'Date parsing'
+                };
+            }
+
+            // 4단계: JobExecutor 실행
             this.jobExecutor = new JobExecutor(this.browser!);
-            
-            const job = this.findJob(jobName);
-            
-            // Job 실행을 JobExecutor에 위임
-            const jobResult = await this.jobExecutor.execute(job, {
-                targetDate: this.parseDate(targetDate)
+            const executionResult = await this.executeJobSafely(jobResult.data, {
+                targetDate: dateResult.data
             });
-            
-            const s3Location = await this.s3Uploader.uploadCrawlingResults(jobResult.results, { 
+
+            if (isFailure(executionResult)) {
+                // Job 실행 실패해도 빈 결과로 서비스 계속 진행
+                console.warn(`Job 실행 실패하지만 서비스 계속 진행:`, executionResult.error.message);
+                
+                const emptyUploadResult = await this.uploadEmptyResultSafely(targetDate, jobName);
+                if (isFailure(emptyUploadResult)) {
+                    return {
+                        success: false,
+                        error: new Error(`Job 실행 실패 후 빈 결과 업로드도 실패: ${emptyUploadResult.error.message}`),
+                        context: 'Empty result upload after job failure'
+                    };
+                }
+
+                return {
+                    success: true,
+                    data: this.createCrawlingResult([], emptyUploadResult.data, 0)
+                };
+            }
+
+            // 5단계: S3 업로드
+            const uploadResult = await this.uploadResultSafely(executionResult.data.results, { 
                 targetDate, 
                 jobName 
             });
-            
+
+            if (isFailure(uploadResult)) {
+                return {
+                    success: false,
+                    error: new Error(`S3 업로드 실패: ${uploadResult.error.message}`),
+                    context: 'S3 upload'
+                };
+            }
+
             const endTime = Date.now();
             console.log(`Crawling completed in ${endTime - startTime}ms`);
 
-            return this.createCrawlingResult(jobResult.processedJobs, s3Location, jobResult.itemCount);
+            return {
+                success: true,
+                data: this.createCrawlingResult(
+                    executionResult.data.processedJobs, 
+                    uploadResult.data, 
+                    executionResult.data.itemCount
+                )
+            };
 
         } finally {
             await this.cleanup();
         }
     }
 
-    private findJob(jobName: string): Job {
-        const job = JobRegistry.getJobByName(jobName);
-        if (!job) {
-            throw new Error(`Job not found: ${jobName}. Available jobs: ${JobRegistry.getJobNames().join(', ')}`);
-        }
-        console.log(`Found job: ${job.jobName}`);
-        return job;
-    }
-
-    private createCrawlingResult(processedJobs: string[], s3Location: string, itemCount: number): CrawlingResult {
-        return {
-            processedJobs,
-            s3Location,
-            itemCount
-        };
-    }
-
-    private async initializeBrowser(): Promise<void> {
-        console.log('Initializing browser...');
-        try {
+    // HOF로 래핑된 브라우저 초기화
+    private initializeBrowserSafely = withErrorHandling(
+        async (): Promise<void> => {
+            console.log('Initializing browser...');
             this.browser = await chromium.launch({
                 headless: true,
                 executablePath: await chromiumBinary.executablePath(),
@@ -99,18 +143,65 @@ export class CrawlingService {
                 ]
             });
             console.log('Browser initialized successfully');
-        } catch (error) {
-            console.error('Failed to initialize browser:', error);
-            throw error;
-        }
-    }
+        },
+        '브라우저 초기화'
+    );
 
-    private parseDate(dateString: string): Date {
-        const date = new Date(dateString);
-        if (isNaN(date.getTime())) {
-            throw new Error(`Invalid date format: ${dateString}`);
-        }
-        return date;
+    // HOF로 래핑된 Job 찾기
+    private findJobSafely = withSyncErrorHandling(
+        (jobName: string): Job => {
+            const job = JobRegistry.getJobByName(jobName);
+            if (!job) {
+                throw new Error(`Job not found: ${jobName}. Available jobs: ${JobRegistry.getJobNames().join(', ')}`);
+            }
+            console.log(`Found job: ${job.jobName}`);
+            return job;
+        },
+        'Job 조회'
+    );
+
+    // HOF로 래핑된 날짜 파싱
+    private parseDateSafely = withSyncErrorHandling(
+        (dateString: string): Date => {
+            const date = new Date(dateString);
+            if (isNaN(date.getTime())) {
+                throw new Error(`Invalid date format: ${dateString}`);
+            }
+            return date;
+        },
+        '날짜 파싱'
+    );
+
+    // HOF로 래핑된 Job 실행
+    private executeJobSafely = withErrorHandling(
+        async (job: Job, context: { targetDate: Date }) => {
+            return await this.jobExecutor!.execute(job, context);
+        },
+        'Job 실행'
+    );
+
+    // HOF로 래핑된 S3 업로드
+    private uploadResultSafely = withErrorHandling(
+        async (results: any[], metadata: any): Promise<string> => {
+            return await this.s3Uploader.uploadCrawlingResults(results, metadata);
+        },
+        'S3 업로드'
+    );
+
+    // HOF로 래핑된 빈 결과 업로드
+    private uploadEmptyResultSafely = withErrorHandling(
+        async (targetDate: string, jobName: string): Promise<string> => {
+            return await this.s3Uploader.uploadCrawlingResults([], { targetDate, jobName });
+        },
+        '빈 결과 S3 업로드'
+    );
+
+    private createCrawlingResult(processedJobs: string[], s3Location: string, itemCount: number): CrawlingResult {
+        return {
+            processedJobs,
+            s3Location,
+            itemCount
+        };
     }
 
     private async cleanup(): Promise<void> {

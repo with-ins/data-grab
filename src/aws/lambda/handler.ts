@@ -1,6 +1,7 @@
 import { Context } from 'aws-lambda';
 import { CrawlingService } from './CrawlingService';
 import { getKoreaTimeISO } from '../../utils/DateUtils';
+import { isSuccess, isFailure } from '../../utils/ErrorHandling';
 
 // Lambda Invocation용 이벤트 인터페이스
 export interface CrawlingEvent {
@@ -48,31 +49,50 @@ export const crawl = async (
         
         const duration = Date.now() - startTime;
         
-        const response: CrawlingResponse = {
-            success: true,
-            message: '크롤링 성공',
-            data: {
-                processedJobs: result.processedJobs,
-                s3Location: result.s3Location,
-                itemCount: result.itemCount,
-                duration
-            },
-            timestamp: getKoreaTimeISO()
-        };
-        
-        console.log('크롤링 성공', {
-            processedJobs: result.processedJobs.length,
-            itemCount: result.itemCount,
-            duration: `${duration}ms`,
-        });
-        
-        return response;
+        // Result 타입 처리
+        if (isSuccess(result)) {
+            const response: CrawlingResponse = {
+                success: true,
+                message: '크롤링 성공',
+                data: {
+                    processedJobs: result.data.processedJobs,
+                    s3Location: result.data.s3Location,
+                    itemCount: result.data.itemCount,
+                    duration
+                },
+                timestamp: getKoreaTimeISO()
+            };
+            
+            console.log('크롤링 성공', {
+                processedJobs: result.data.processedJobs.length,
+                itemCount: result.data.itemCount,
+                duration: `${duration}ms`,
+            });
+            
+            return response;
+        } else {
+            // CrawlingService에서 Result로 처리된 실패
+            console.error('크롤링 서비스 실패', {
+                error: result.error.message,
+                context: result.context,
+                duration: `${duration}ms`,
+                remainingTime: context.getRemainingTimeInMillis()
+            });
+            
+            return {
+                success: false,
+                message: '크롤링 실패',
+                error: `${result.context}: ${result.error.message}`,
+                timestamp: getKoreaTimeISO()
+            };
+        }
         
     } catch (error) {
+        // 예상치 못한 시스템 에러 (입력 검증 실패 등)
         const duration = Date.now() - startTime;
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
         
-        console.error('크롤링 실패', {
+        console.error('시스템 에러', {
             error: errorMessage,
             stack: error instanceof Error ? error.stack : undefined,
             duration: `${duration}ms`,
@@ -81,7 +101,7 @@ export const crawl = async (
         
         return {
             success: false,
-            message: '크롤링 실패',
+            message: '시스템 에러',
             error: errorMessage,
             timestamp: getKoreaTimeISO()
         };
