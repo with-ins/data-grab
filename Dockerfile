@@ -28,4 +28,4 @@ RUN npm ci --only=production
 COPY --from=builder /build/dist/ ./
 
 # Lambda 핸들러 설정
-CMD ["lambda/handler.crawl"] 
+CMD ["aws/lambda/handler.crawl"] 
