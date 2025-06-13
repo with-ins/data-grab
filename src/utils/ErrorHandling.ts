@@ -6,7 +6,8 @@ export type Result<T, E = Error> =
   | { success: false; error: E; context?: string };
 
 /**
- * HOF: 비동기 함수를 래핑하여 예외를 Result 타입으로 변환
+ * 
+ * HOF(고차함수)): 비동기 함수를 래핑하여 예외를 Result 타입으로 변환
  */
 export function withErrorHandling<T, A extends any[]>(
   fn: (...args: A) => Promise<T>,
@@ -37,7 +38,7 @@ export function withErrorHandling<T, A extends any[]>(
 }
 
 /**
- * HOF: 동기 함수를 래핑하여 예외를 Result 타입으로 변환
+ * HOF(고차함수): 동기 함수를 래핑하여 예외를 Result 타입으로 변환
  */
 export function withSyncErrorHandling<T, A extends any[]>(
   fn: (...args: A) => T,
