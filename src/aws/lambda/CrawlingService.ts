@@ -12,6 +12,7 @@ import {
     isSuccess,
     isFailure,
 } from '../../utils/ErrorHandling';
+import { AppError, CrawlingError, S3Error, ErrorCode } from '../../errors/AppError';
 
 const chromiumBinary = require('@sparticuz/chromium');
 
@@ -40,7 +41,11 @@ export class CrawlingService {
             if (isFailure(browserResult)) {
                 return {
                     success: false,
-                    error: new Error(`브라우저 초기화 실패: ${browserResult.error.message}`),
+                    error: new CrawlingError(
+                        `브라우저 초기화 실패: ${browserResult.error.message}`,
+                        browserResult.error,
+                        'Browser initialization'
+                    ),
                     context: 'Browser initialization',
                 };
             }
@@ -82,8 +87,10 @@ export class CrawlingService {
                 if (isFailure(emptyUploadResult)) {
                     return {
                         success: false,
-                        error: new Error(
-                            `Job 실행 실패 후 빈 결과 업로드도 실패: ${emptyUploadResult.error.message}`
+                        error: new CrawlingError(
+                            `Job 실행 실패 후 빈 결과 업로드도 실패: ${emptyUploadResult.error.message}`,
+                            emptyUploadResult.error,
+                            'Empty result upload after job failure'
                         ),
                         context: 'Empty result upload after job failure',
                     };
@@ -104,7 +111,11 @@ export class CrawlingService {
             if (isFailure(uploadResult)) {
                 return {
                     success: false,
-                    error: new Error(`S3 업로드 실패: ${uploadResult.error.message}`),
+                    error: new S3Error(
+                        `S3 업로드 실패: ${uploadResult.error.message}`,
+                        uploadResult.error,
+                        'S3 upload'
+                    ),
                     context: 'S3 upload',
                 };
             }

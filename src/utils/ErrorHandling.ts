@@ -1,13 +1,14 @@
+import { AppError, ErrorCode } from '../errors/AppError';
+
 /**
  * Result 타입 - 성공 또는 실패를 나타내는 타입
  */
-export type Result<T, E = Error> = 
+export type Result<T, E = AppError> = 
   | { success: true; data: T }
   | { success: false; error: E; context?: string };
 
 /**
- * 
- * HOF(고차함수)): 비동기 함수를 래핑하여 예외를 Result 타입으로 변환
+ * HOF(고차함수): 비동기 함수를 래핑하여 예외를 Result 타입으로 변환
  */
 export function withErrorHandling<T, A extends any[]>(
   fn: (...args: A) => Promise<T>,
@@ -20,17 +21,20 @@ export function withErrorHandling<T, A extends any[]>(
       console.log(`[${context}] 성공`);
       return { success: true, data };
     } catch (error) {
-      const errorInstance = error instanceof Error ? error : new Error(String(error));
+      const errorInstance = error instanceof AppError 
+        ? error 
+        : new AppError(
+            String(error),
+            ErrorCode.UNKNOWN,
+            context,
+            error
+          );
       
-      console.error(`[${context}] 실패:`, {
-        error: errorInstance.message,
-        stack: errorInstance.stack,
-        timestamp: new Date().toISOString()
-      });
+      console.error(`[${context}] 실패:`, errorInstance.toJSON());
       
       return { 
         success: false, 
-        error: errorInstance, 
+        error: errorInstance,
         context 
       };
     }
@@ -51,16 +55,20 @@ export function withSyncErrorHandling<T, A extends any[]>(
       console.log(`[${context}] 성공`);
       return { success: true, data };
     } catch (error) {
-      const errorInstance = error instanceof Error ? error : new Error(String(error));
+      const errorInstance = error instanceof AppError 
+        ? error 
+        : new AppError(
+            String(error),
+            ErrorCode.UNKNOWN,
+            context,
+            error
+          );
       
-      console.error(`[${context}] 실패:`, {
-        error: errorInstance.message,
-        timestamp: new Date().toISOString()
-      });
+      console.error(`[${context}] 실패:`, errorInstance.toJSON());
       
       return { 
         success: false, 
-        error: errorInstance, 
+        error: errorInstance,
         context 
       };
     }

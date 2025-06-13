@@ -1,4 +1,5 @@
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import { AppError, S3Error, ErrorCode } from '../../errors/AppError';
 
 export interface UploadOptions {
     targetDate: string;
@@ -47,8 +48,10 @@ export class S3Uploader {
             return location;
         } catch (error) {
             console.error('Error uploading file to S3:', error);
-            throw new Error(
-                `Failed to upload file to S3: ${error instanceof Error ? error.message : 'Unknown error'}`
+            throw new S3Error(
+                `Failed to upload file to S3: ${error instanceof Error ? error.message : 'Unknown error'}`,
+                error,
+                'S3Uploader.uploadToS3'
             );
         }
     }

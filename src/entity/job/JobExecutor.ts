@@ -1,5 +1,6 @@
 import { Browser, Page } from 'playwright-core';
 import { Job } from './Job';
+import { JobExecutionError } from '../../errors/AppError';
 
 export interface ExecutionContext {
     targetDate: Date;
@@ -15,16 +16,6 @@ export interface JobExecutionResult {
     processedJobs: string[];
     results: any[];
     itemCount: number;
-}
-
-export class JobExecutionError extends Error {
-    constructor(
-        message: string,
-        public cause?: any
-    ) {
-        super(message);
-        this.name = 'JobExecutionError';
-    }
 }
 
 /**
