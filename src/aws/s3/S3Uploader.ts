@@ -17,16 +17,16 @@ export class S3Uploader {
 
     constructor() {
         this.bucketName = process.env.S3_BUCKET_NAME || S3Uploader.DEFAULT_BUCKET_NAME;
-        
+
         this.s3Client = new S3Client({
-            region: process.env.AWS_REGION || S3Uploader.DEFAULT_REGION
+            region: process.env.AWS_REGION || S3Uploader.DEFAULT_REGION,
         });
     }
 
     async uploadCrawlingResults(results: any[], options: UploadOptions): Promise<string> {
         const fileName = this.generateFileName(options);
         const jsonData = this.formatAsJson(results);
-        
+
         return await this.uploadToS3(fileName, jsonData);
     }
 
@@ -36,18 +36,20 @@ export class S3Uploader {
                 Bucket: this.bucketName,
                 Key: filePath,
                 Body: jsonData,
-                ContentType: S3Uploader.CONTENT_TYPE_JSON
+                ContentType: S3Uploader.CONTENT_TYPE_JSON,
             });
 
             await this.s3Client.send(command);
-            
+
             const location = `${S3Uploader.S3_URI_SCHEME}${this.bucketName}/${filePath}`;
-            console.log(`데이터가 S3에 업로드 됨`, {location});
-            
+            console.log(`데이터가 S3에 업로드 됨`, { location });
+
             return location;
         } catch (error) {
             console.error('Error uploading file to S3:', error);
-            throw new Error(`Failed to upload file to S3: ${error instanceof Error ? error.message : 'Unknown error'}`);
+            throw new Error(
+                `Failed to upload file to S3: ${error instanceof Error ? error.message : 'Unknown error'}`
+            );
         }
     }
 
@@ -59,4 +61,4 @@ export class S3Uploader {
     private formatAsJson(results: any[]): string {
         return JSON.stringify(results, null, 2);
     }
-} 
+}

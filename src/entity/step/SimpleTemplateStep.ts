@@ -1,12 +1,11 @@
-import {AbstractStep} from "./AbstractStep";
-import {Locator, Page} from "playwright-core";
-import {Category} from "../Category";
+import { AbstractStep } from './AbstractStep';
+import { Locator, Page } from 'playwright-core';
+import { Category } from '../Category';
 
 export abstract class SimpleTemplateStep extends AbstractStep {
-
-    private readonly url : string;
-    private readonly selectorAll : string;
-    private readonly category : Category;
+    private readonly url: string;
+    private readonly selectorAll: string;
+    private readonly category: Category;
 
     constructor(url: string, selectorAll: string, type: Category) {
         super();
@@ -16,28 +15,26 @@ export abstract class SimpleTemplateStep extends AbstractStep {
     }
 
     async execute(page: Page, baseUrl: string, syncDate: Date): Promise<Record<string, any[]>> {
-
-        await page.goto(this.url)
+        await page.goto(this.url);
 
         await page.waitForSelector(this.selectorAll, {
-            state: 'attached'
-        })
+            state: 'attached',
+        });
 
         const cards = await page.locator(this.selectorAll).all();
 
         const list = [];
 
         for (const card of cards) {
-
             const result = await this.select(card, baseUrl);
             if (result == null) continue;
-            list.push(result)
+            list.push(result);
         }
 
         return {
-            [this.category] : list
+            [this.category]: list,
         };
     }
 
-    abstract select(card: Locator, baseUrl: string) : Promise<object>;
+    abstract select(card: Locator, baseUrl: string): Promise<object>;
 }

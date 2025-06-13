@@ -1,8 +1,6 @@
-import {Page} from "playwright-core";
-
+import { Page } from 'playwright-core';
 
 export interface Job {
-
     jobName: string;
 
     /**
@@ -17,5 +15,4 @@ export interface Job {
      * 단일 구조임
      */
     run(page: Page, targetDate: Date): Promise<Record<string, any[]>>;
-
 }

@@ -78,42 +78,42 @@ export function isFailure<T, E>(result: Result<T, E>): result is { success: fals
   return !result.success;
 }
 
-/**
- * 여러 Result를 조합하는 유틸리티
- */
-export function combineResults<T>(results: Result<T>[]): Result<T[]> {
-  const successResults: T[] = [];
-  const errors: Error[] = [];
+// /**
+//  * 여러 Result를 조합하는 유틸리티
+//  */
+// export function combineResults<T>(results: Result<T>[]): Result<T[]> {
+//   const successResults: T[] = [];
+//   const errors: Error[] = [];
   
-  for (const result of results) {
-    if (isSuccess(result)) {
-      successResults.push(result.data);
-    } else {
-      errors.push(result.error);
-    }
-  }
+//   for (const result of results) {
+//     if (isSuccess(result)) {
+//       successResults.push(result.data);
+//     } else {
+//       errors.push(result.error);
+//     }
+//   }
   
-  if (errors.length > 0) {
-    return {
-      success: false,
-      error: new Error(`${errors.length}개 작업 실패: ${errors.map(e => e.message).join(', ')}`),
-      context: 'Combined operations'
-    };
-  }
+//   if (errors.length > 0) {
+//     return {
+//       success: false,
+//       error: new Error(`${errors.length}개 작업 실패: ${errors.map(e => e.message).join(', ')}`),
+//       context: 'Combined operations'
+//     };
+//   }
   
-  return { success: true, data: successResults };
-}
+//   return { success: true, data: successResults };
+// }
 
 /**
  * Result에서 데이터를 안전하게 추출하는 유틸리티
  */
-export function unwrapOr<T>(result: Result<T>, defaultValue: T): T {
-  return isSuccess(result) ? result.data : defaultValue;
-}
+// export function unwrapOr<T>(result: Result<T>, defaultValue: T): T {
+//   return isSuccess(result) ? result.data : defaultValue;
+// }
 
-export function unwrapOrThrow<T>(result: Result<T>): T {
-  if (isSuccess(result)) {
-    return result.data;
-  }
-  throw result.error;
-} 
+// export function unwrapOrThrow<T>(result: Result<T>): T {
+//   if (isSuccess(result)) {
+//     return result.data;
+//   }
+//   throw result.error;
+// } 

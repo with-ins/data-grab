@@ -1,16 +1,18 @@
-import {AbstractStep} from "../../../../step/AbstractStep";
-import {Category} from "../../../../Category";
-import {Page} from "playwright-core";
-import {parseDate, isDateAfter} from "../../../../../utils/DateUtils";
-
+import { AbstractStep } from '../../../../step/AbstractStep';
+import { Category } from '../../../../Category';
+import { Page } from 'playwright-core';
+import { parseDate, isDateAfter } from '../../../../../utils/DateUtils';
 
 export class OnlyBucheonImageStep extends AbstractStep {
-
-    private readonly category : Category;
-    private readonly url : string;
+    private readonly category: Category;
+    private readonly url: string;
     private readonly parseToLink: (param1: string, param2: string, param3: string) => string;
 
-    constructor(category: Category, url : string, parseToLink: (param1: string, param2: string, param3: string) => string) {
+    constructor(
+        category: Category,
+        url: string,
+        parseToLink: (param1: string, param2: string, param3: string) => string
+    ) {
         super();
         this.category = category;
         this.url = url;
@@ -18,11 +20,10 @@ export class OnlyBucheonImageStep extends AbstractStep {
     }
 
     async execute(page: Page, baseUrl: string, syncDate: Date): Promise<Record<string, any[]>> {
-
         await page.goto(this.url, { waitUntil: 'domcontentloaded' });
 
         await page.waitForSelector('.gallery_list', {
-            state: 'attached'
+            state: 'attached',
         });
 
         const cards = await page.locator('.tit_cont').all();
@@ -34,11 +35,17 @@ export class OnlyBucheonImageStep extends AbstractStep {
             await page.goto(link, { waitUntil: 'domcontentloaded' });
 
             await page.waitForSelector('.board_v_title', {
-                state: 'attached'
+                state: 'attached',
             });
 
-            let dateStr = (await page.locator('.board_v_title > ul > li:nth-child(1) > span:nth-child(2)').textContent()).trim().slice(0, 10)
-            const createdAt = parseDate(dateStr)
+            let dateStr = (
+                await page
+                    .locator('.board_v_title > ul > li:nth-child(1) > span:nth-child(2)')
+                    .textContent()
+            )
+                .trim()
+                .slice(0, 10);
+            const createdAt = parseDate(dateStr);
 
             if (!isDateAfter(syncDate, createdAt)) {
                 break;
@@ -47,16 +54,16 @@ export class OnlyBucheonImageStep extends AbstractStep {
             const title = (await page.locator('.board_v_title h3 span').textContent()).trim();
 
             list.push({
-                'id' : null,
-                'title' : title,
-                'createdAt' : createdAt,
-                'link' : link,
-            })
+                id: null,
+                title: title,
+                createdAt: createdAt,
+                link: link,
+            });
 
             await page.goBack();
         }
         return {
-            [this.category] : list
+            [this.category]: list,
         };
     }
 

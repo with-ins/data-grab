@@ -1,31 +1,21 @@
-import {AbstractJob} from "../AbstractJob";
-import {SimpleTemplateStep} from "../../step/SimpleTemplateStep";
-import {Locator} from "playwright-core";
-import {Category} from "../../Category";
-import {parseDate} from "../../../utils/DateUtils";
-import {Optimize, Optimizer} from "../../Optimize";
+import { AbstractJob } from '../AbstractJob';
+import { SimpleTemplateStep } from '../../step/SimpleTemplateStep';
+import { Locator } from 'playwright-core';
+import { Category } from '../../Category';
+import { parseDate } from '../../../utils/DateUtils';
+import { Optimize, Optimizer } from '../../Optimize';
 
 export class 대한의료사회복지사협회 extends AbstractJob {
-
-
     constructor() {
-        super(
-            '대한의료사회복지사협회',
-            'https://kamsw.or.kr',
-            [
-                new 공지사항(),
-                new 채용()
-            ]
-        );
+        super('대한의료사회복지사협회', 'https://kamsw.or.kr', [new 공지사항(), new 채용()]);
     }
 
     registerOptimizer(optimizer: Optimizer) {
-        optimizer.register(Optimize.JS)
+        optimizer.register(Optimize.JS);
     }
 }
 
 class 공지사항 extends SimpleTemplateStep {
-
     constructor() {
         super(
             'https://kamsw.or.kr/notice',
@@ -35,21 +25,20 @@ class 공지사항 extends SimpleTemplateStep {
     }
 
     async select(card: Locator, baseUrl: string): Promise<object> {
-
         const a = card.locator('.title a');
 
-        const link = baseUrl + await a.getAttribute('href');
+        const link = baseUrl + (await a.getAttribute('href'));
         const id = this.extractIdUsingStringMethods(link);
         const title = (await a.textContent()).trim();
         const dateStr = (await card.locator('.time').textContent()).trim();
         const createdAt = parseDate(dateStr, '.');
 
         return {
-            'id' : parseInt(id),
-            'title' : title,
-            'createdAt' : createdAt,
-            'link' : link,
-        }
+            id: parseInt(id),
+            title: title,
+            createdAt: createdAt,
+            link: link,
+        };
     }
 
     private extractIdUsingStringMethods(url: string): string | null {
@@ -61,7 +50,6 @@ class 공지사항 extends SimpleTemplateStep {
     }
 }
 class 채용 extends SimpleTemplateStep {
-
     constructor() {
         super(
             'https://kamsw.or.kr/recruit1',
@@ -71,21 +59,20 @@ class 채용 extends SimpleTemplateStep {
     }
 
     async select(card: Locator, baseUrl: string): Promise<object> {
-
         const a = card.locator('.title a');
 
-        const link = baseUrl + await a.getAttribute('href');
+        const link = baseUrl + (await a.getAttribute('href'));
         const id = this.extractIdUsingStringMethods(link);
         const title = (await a.textContent()).trim();
         const dateStr = (await card.locator('.time').textContent()).trim();
         const createdAt = parseDate(dateStr, '.');
 
         return {
-            'id' : parseInt(id),
-            'title' : title,
-            'createdAt' : createdAt,
-            'link' : link,
-        }
+            id: parseInt(id),
+            title: title,
+            createdAt: createdAt,
+            link: link,
+        };
     }
 
     private extractIdUsingStringMethods(url: string): string | null {

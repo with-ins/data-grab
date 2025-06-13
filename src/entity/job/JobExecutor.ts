@@ -18,7 +18,10 @@ export interface JobExecutionResult {
 }
 
 export class JobExecutionError extends Error {
-    constructor(message: string, public cause?: any) {
+    constructor(
+        message: string,
+        public cause?: any
+    ) {
         super(message);
         this.name = 'JobExecutionError';
     }
@@ -33,20 +36,20 @@ export class JobExecutor {
 
     async execute(job: Job, context: ExecutionContext): Promise<JobExecutionResult> {
         console.log(`${job.jobName} Job 실행 시작`);
-        
+
         let page: Page | null = null;
-        
+
         try {
             page = await this.createPage(context.pageOptions);
             const result = await job.run(page, context.targetDate);
             const flatResults = this.transformResults(result, job.jobName);
-            
+
             console.log(`${job.jobName} Job 실행 성공, items: ${flatResults.length}`);
-            
+
             return {
                 processedJobs: [job.jobName],
                 results: flatResults,
-                itemCount: flatResults.length
+                itemCount: flatResults.length,
             };
         } catch (error) {
             console.error(`Job execution failed: ${job.jobName}`, error);
@@ -60,14 +63,14 @@ export class JobExecutor {
 
     private async createPage(options?: PageOptions): Promise<Page> {
         const page = await this.browser.newPage();
-        
+
         const viewport = options?.viewport || { width: 1280, height: 720 };
         await page.setViewportSize(viewport);
-        
+
         if (options?.timeout) {
             page.setDefaultTimeout(options.timeout);
         }
-        
+
         return page;
     }
 
@@ -78,25 +81,25 @@ export class JobExecutor {
      */
     private transformResults(result: Record<string, any[]>, jobName: string): any[] {
         const flatResults: any[] = [];
-        
+
         for (const [institutionName, categories] of Object.entries(result)) {
             if (typeof categories === 'object' && categories !== null) {
                 for (const [category, items] of Object.entries(categories)) {
                     if (Array.isArray(items)) {
-                        items.forEach(item => {
+                        items.forEach((item) => {
                             flatResults.push({
                                 jobName,
                                 institutionName,
                                 category,
                                 crawledAt: new Date().toISOString(),
-                                ...item
+                                ...item,
                             });
                         });
                     }
                 }
             }
         }
-        
+
         return flatResults;
     }
-} 
+}

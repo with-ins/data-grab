@@ -1,30 +1,25 @@
-import {AbstractJob} from "../../AbstractJob";
-import {Locator} from "playwright-core";
-import {parseDate} from "../../../../utils/DateUtils";
-import {SimpleTemplateStep} from "../../../step/SimpleTemplateStep";
-import {Category} from "../../../Category";
-import {type} from "node:os";
-import {Optimize, Optimizer} from "../../../Optimize";
+import { AbstractJob } from '../../AbstractJob';
+import { Locator } from 'playwright-core';
+import { parseDate } from '../../../../utils/DateUtils';
+import { SimpleTemplateStep } from '../../../step/SimpleTemplateStep';
+import { Category } from '../../../Category';
+import { type } from 'node:os';
+import { Optimize, Optimizer } from '../../../Optimize';
 
 export class 서울시사회복지사협회 extends AbstractJob {
     constructor() {
-        super(
-            '서울시사회복지사협회',
-            'https://sasw.or.kr',
-            [
-                new SeoulNoticeStep(),
-                new SeoulRecruitStep(),
-                new SeoulEventStep(),
-            ]
-        );
+        super('서울시사회복지사협회', 'https://sasw.or.kr', [
+            new SeoulNoticeStep(),
+            new SeoulRecruitStep(),
+            new SeoulEventStep(),
+        ]);
     }
 
     registerOptimizer(optimizer: Optimizer) {
-        optimizer.register(Optimize.JS)
+        optimizer.register(Optimize.JS);
     }
 }
 class SeoulEventStep extends SimpleTemplateStep {
-
     constructor() {
         super(
             'https://sasw.or.kr/event',
@@ -40,20 +35,19 @@ class SeoulEventStep extends SimpleTemplateStep {
         const id = (await card.locator('.no').textContent()).trim();
         const a = card.locator('.title a');
 
-        const link = baseUrl + await a.getAttribute('href');
+        const link = baseUrl + (await a.getAttribute('href'));
         const title = (await a.textContent()).trim();
         const createdAt = parseDate((await card.locator('.time').textContent()).trim(), '.');
 
         return {
-            'id' : parseInt(id),
-            'title' : title,
-            'createdAt' : createdAt,
-            'link' : link,
-        }
+            id: parseInt(id),
+            title: title,
+            createdAt: createdAt,
+            link: link,
+        };
     }
 }
 class SeoulRecruitStep extends SimpleTemplateStep {
-
     constructor() {
         super(
             'https://sasw.or.kr/recruit',
@@ -66,20 +60,19 @@ class SeoulRecruitStep extends SimpleTemplateStep {
         const id = (await card.locator('.no').textContent()).trim();
         const a = card.locator('.title a');
 
-        const link = baseUrl + await a.getAttribute('href');
+        const link = baseUrl + (await a.getAttribute('href'));
         const title = (await a.textContent()).trim();
         const createdAt = parseDate((await card.locator('.time').textContent()).trim(), '.');
 
         return {
-            'id' : parseInt(id),
-            'title' : title,
-            'createdAt' : createdAt,
-            'link' : link,
-        }
+            id: parseInt(id),
+            title: title,
+            createdAt: createdAt,
+            link: link,
+        };
     }
 }
 class SeoulNoticeStep extends SimpleTemplateStep {
-
     constructor() {
         super(
             'https://sasw.or.kr/notice',
@@ -96,15 +89,15 @@ class SeoulNoticeStep extends SimpleTemplateStep {
 
         const a = card.locator('.title a');
 
-        const link = baseUrl + await a.getAttribute('href');
+        const link = baseUrl + (await a.getAttribute('href'));
         const title = (await a.textContent()).trim();
         const createdAt = parseDate((await card.locator('.time').textContent()).trim(), '.');
 
         return {
-            'id' : parseInt(id),
-            'title' : title,
-            'createdAt' : createdAt,
-            'link' : link,
-        }
+            id: parseInt(id),
+            title: title,
+            createdAt: createdAt,
+            link: link,
+        };
     }
 }

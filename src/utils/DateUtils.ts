@@ -1,5 +1,5 @@
-import path from "node:path";
-import fs from "node:fs";
+import path from 'node:path';
+import fs from 'node:fs';
 
 /**
  * 한국 시간 ISO 형식 반환
@@ -7,9 +7,13 @@ import fs from "node:fs";
  * @example "2025-06-10T22:12:35+09:00"
  */
 export function getKoreaTimeISO(): string {
-    return new Date().toLocaleString('sv-SE', { 
-        timeZone: 'Asia/Seoul' 
-    }).replace(' ', 'T') + '+09:00';
+    return (
+        new Date()
+            .toLocaleString('sv-SE', {
+                timeZone: 'Asia/Seoul',
+            })
+            .replace(' ', 'T') + '+09:00'
+    );
 }
 
 export function formatDate(date: Date): string {
@@ -20,7 +24,7 @@ export function formatDate(date: Date): string {
 }
 
 export function parseDate(dateString: string, split: string = '-'): Date {
-    const parts = dateString.split(split).map(num => parseInt(num, 10));
+    const parts = dateString.split(split).map((num) => parseInt(num, 10));
 
     if (parts.length !== 3 || parts.some(isNaN)) {
         throw new Error(`Invalid date format: ${dateString}`);

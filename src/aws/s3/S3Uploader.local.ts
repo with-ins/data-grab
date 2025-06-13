@@ -31,7 +31,7 @@ export class S3Uploader {
 
         // MinIO 또는 실제 S3 설정
         const s3Config: any = {
-            region: process.env.AWS_REGION || S3Uploader.DEFAULT_REGION
+            region: process.env.AWS_REGION || S3Uploader.DEFAULT_REGION,
         };
 
         // MinIO 설정 (로컬 테스트용)
@@ -39,7 +39,8 @@ export class S3Uploader {
             s3Config.endpoint = this.endpointUrl;
             s3Config.credentials = {
                 accessKeyId: process.env.AWS_ACCESS_KEY_ID || S3Uploader.DEFAULT_MINIO_ACCESS_KEY,
-                secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || S3Uploader.DEFAULT_MINIO_SECRET_KEY
+                secretAccessKey:
+                    process.env.AWS_SECRET_ACCESS_KEY || S3Uploader.DEFAULT_MINIO_SECRET_KEY,
             };
             s3Config.forcePathStyle = true; // MinIO는 path-style을 사용
             console.log(`🔧 MinIO mode detected - Endpoint: ${this.endpointUrl}`);
@@ -51,7 +52,7 @@ export class S3Uploader {
     async uploadCrawlingResults(results: any[], options: UploadOptions): Promise<string> {
         const fileName = this.generateFileName(options);
         const jsonData = this.formatAsJson(results);
-        
+
         return await this.uploadToS3(fileName, jsonData);
     }
 
@@ -61,22 +62,24 @@ export class S3Uploader {
                 Bucket: this.bucketName,
                 Key: key,
                 Body: data,
-                ContentType: S3Uploader.CONTENT_TYPE_JSON
+                ContentType: S3Uploader.CONTENT_TYPE_JSON,
             });
 
             await this.s3Client.send(command);
-            
+
             // MinIO와 S3에 따라 다른 URL 형식 반환
-            const location = this.isMinIO 
+            const location = this.isMinIO
                 ? `${this.endpointUrl}/${this.bucketName}/${key}`
                 : `${S3Uploader.S3_URI_SCHEME}${this.bucketName}/${key}`;
-            
+
             console.log(`✅ File uploaded successfully: ${location}`);
-            
+
             return location;
         } catch (error) {
             console.error('❌ Error uploading file to S3:', error);
-            throw new Error(`Failed to upload file to S3: ${error instanceof Error ? error.message : 'Unknown error'}`);
+            throw new Error(
+                `Failed to upload file to S3: ${error instanceof Error ? error.message : 'Unknown error'}`
+            );
         }
     }
 
@@ -88,4 +91,4 @@ export class S3Uploader {
     private formatAsJson(results: any[]): string {
         return JSON.stringify(results, null, 2);
     }
-} 
+}

@@ -1,31 +1,21 @@
-import {AbstractJob} from "../../AbstractJob";
-import {SimpleTemplateStep} from "../../../step/SimpleTemplateStep";
-import {Locator} from "playwright-core";
-import {Category} from "../../../Category";
-import {parseDate} from "../../../../utils/DateUtils";
-import {Optimize, Optimizer} from "../../../Optimize";
+import { AbstractJob } from '../../AbstractJob';
+import { SimpleTemplateStep } from '../../../step/SimpleTemplateStep';
+import { Locator } from 'playwright-core';
+import { Category } from '../../../Category';
+import { parseDate } from '../../../../utils/DateUtils';
+import { Optimize, Optimizer } from '../../../Optimize';
 
 export class 경기도사회복지사협회 extends AbstractJob {
-
-
     constructor() {
-        super(
-            '경기도사회복지사협회',
-            'https://www.ggsw.kr',
-            [
-                new 공지사항(),
-                new 채용(),
-            ]
-        );
+        super('경기도사회복지사협회', 'https://www.ggsw.kr', [new 공지사항(), new 채용()]);
     }
 
     registerOptimizer(optimizer: Optimizer) {
-        optimizer.register(Optimize.JS)
+        optimizer.register(Optimize.JS);
     }
 }
 
 class 공지사항 extends SimpleTemplateStep {
-
     constructor() {
         super(
             'https://www.ggsw.kr/public/board/bbs61?s_type=title&s_category=%EA%B3%B5%EC%A7%80&s_word=',
@@ -35,22 +25,21 @@ class 공지사항 extends SimpleTemplateStep {
     }
 
     async select(card: Locator, baseUrl: string): Promise<object> {
-
         const link = await card.getAttribute('href');
         const id = this.extractIdUsingStringMethods(link);
-        const title = (await card.locator('.txt_box').textContent()).trim()
+        const title = (await card.locator('.txt_box').textContent()).trim();
 
-        const dateDiv  = card.locator('.date_box');
+        const dateDiv = card.locator('.date_box');
         const yearMonth = (await dateDiv.locator('span').textContent()).trim();
         const day = (await dateDiv.locator('p').textContent()).trim();
         const createdAt = parseDate(yearMonth + '.' + day, '.');
 
         return {
-            'id' : parseInt(id),
-            'title' : title,
-            'createdAt' : createdAt,
-            'link' : link,
-        }
+            id: parseInt(id),
+            title: title,
+            createdAt: createdAt,
+            link: link,
+        };
     }
 
     private extractIdUsingStringMethods(url: string): string | null {
@@ -60,10 +49,8 @@ class 공지사항 extends SimpleTemplateStep {
         const segments = urlWithoutQuery.split('/');
         return segments[segments.length - 1] || null;
     }
-
 }
 class 채용 extends SimpleTemplateStep {
-
     constructor() {
         super(
             'https://www.ggsw.kr/public/board/bbs61?s_type=title&s_category=%EC%B1%84%EC%9A%A9&s_word=',
@@ -73,22 +60,21 @@ class 채용 extends SimpleTemplateStep {
     }
 
     async select(card: Locator, baseUrl: string): Promise<object> {
-
         const link = await card.getAttribute('href');
         const id = this.extractIdUsingStringMethods(link);
-        const title = (await card.locator('.txt_box').textContent()).trim()
+        const title = (await card.locator('.txt_box').textContent()).trim();
 
-        const dateDiv  = card.locator('.date_box');
+        const dateDiv = card.locator('.date_box');
         const yearMonth = (await dateDiv.locator('span').textContent()).trim();
         const day = (await dateDiv.locator('p').textContent()).trim();
         const createdAt = parseDate(yearMonth + '.' + day, '.');
 
         return {
-            'id' : parseInt(id),
-            'title' : title,
-            'createdAt' : createdAt,
-            'link' : link,
-        }
+            id: parseInt(id),
+            title: title,
+            createdAt: createdAt,
+            link: link,
+        };
     }
 
     private extractIdUsingStringMethods(url: string): string | null {
@@ -98,5 +84,4 @@ class 채용 extends SimpleTemplateStep {
         const segments = urlWithoutQuery.split('/');
         return segments[segments.length - 1] || null;
     }
-
 }

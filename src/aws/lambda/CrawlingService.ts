@@ -5,7 +5,13 @@ import { Job } from '../../entity/job/Job';
 import { JobExecutor } from '../../entity/job/JobExecutor';
 import { S3Uploader } from '../s3/S3Uploader';
 import { getKoreaTimeISO } from '../../utils/DateUtils';
-import { Result, withErrorHandling, withSyncErrorHandling, isSuccess, isFailure } from '../../utils/ErrorHandling';
+import {
+    Result,
+    withErrorHandling,
+    withSyncErrorHandling,
+    isSuccess,
+    isFailure,
+} from '../../utils/ErrorHandling';
 
 const chromiumBinary = require('@sparticuz/chromium');
 
@@ -35,7 +41,7 @@ export class CrawlingService {
                 return {
                     success: false,
                     error: new Error(`브라우저 초기화 실패: ${browserResult.error.message}`),
-                    context: 'Browser initialization'
+                    context: 'Browser initialization',
                 };
             }
 
@@ -45,7 +51,7 @@ export class CrawlingService {
                 return {
                     success: false,
                     error: jobResult.error,
-                    context: 'Job lookup'
+                    context: 'Job lookup',
                 };
             }
 
@@ -55,46 +61,51 @@ export class CrawlingService {
                 return {
                     success: false,
                     error: dateResult.error,
-                    context: 'Date parsing'
+                    context: 'Date parsing',
                 };
             }
 
             // 4단계: JobExecutor 실행
             this.jobExecutor = new JobExecutor(this.browser!);
             const executionResult = await this.executeJobSafely(jobResult.data, {
-                targetDate: dateResult.data
+                targetDate: dateResult.data,
             });
 
             if (isFailure(executionResult)) {
                 // Job 실행 실패해도 빈 결과로 서비스 계속 진행
-                console.warn(`Job 실행 실패하지만 서비스 계속 진행:`, executionResult.error.message);
-                
+                console.warn(
+                    `Job 실행 실패하지만 서비스 계속 진행:`,
+                    executionResult.error.message
+                );
+
                 const emptyUploadResult = await this.uploadEmptyResultSafely(targetDate, jobName);
                 if (isFailure(emptyUploadResult)) {
                     return {
                         success: false,
-                        error: new Error(`Job 실행 실패 후 빈 결과 업로드도 실패: ${emptyUploadResult.error.message}`),
-                        context: 'Empty result upload after job failure'
+                        error: new Error(
+                            `Job 실행 실패 후 빈 결과 업로드도 실패: ${emptyUploadResult.error.message}`
+                        ),
+                        context: 'Empty result upload after job failure',
                     };
                 }
 
                 return {
                     success: true,
-                    data: this.createCrawlingResult([], emptyUploadResult.data, 0)
+                    data: this.createCrawlingResult([], emptyUploadResult.data, 0),
                 };
             }
 
             // 5단계: S3 업로드
-            const uploadResult = await this.uploadResultSafely(executionResult.data.results, { 
-                targetDate, 
-                jobName 
+            const uploadResult = await this.uploadResultSafely(executionResult.data.results, {
+                targetDate,
+                jobName,
             });
 
             if (isFailure(uploadResult)) {
                 return {
                     success: false,
                     error: new Error(`S3 업로드 실패: ${uploadResult.error.message}`),
-                    context: 'S3 upload'
+                    context: 'S3 upload',
                 };
             }
 
@@ -104,73 +115,65 @@ export class CrawlingService {
             return {
                 success: true,
                 data: this.createCrawlingResult(
-                    executionResult.data.processedJobs, 
-                    uploadResult.data, 
+                    executionResult.data.processedJobs,
+                    uploadResult.data,
                     executionResult.data.itemCount
-                )
+                ),
             };
-
         } finally {
             await this.cleanup();
         }
     }
 
     // HOF로 래핑된 브라우저 초기화
-    private initializeBrowserSafely = withErrorHandling(
-        async (): Promise<void> => {
-            console.log('Initializing browser...');
-            this.browser = await chromium.launch({
-                headless: true,
-                executablePath: await chromiumBinary.executablePath(),
-                args: [
-                    ...chromiumBinary.args,
-                    '--no-sandbox',
-                    '--disable-dev-shm-usage',
-                    '--disable-gpu',
-                    '--disable-features=VizDisplayCompositor',
-                    '--disable-background-timer-throttling',
-                    '--disable-backgrounding-occluded-windows',
-                    '--disable-renderer-backgrounding',
-                    '--disable-web-security',
-                    '--single-process',
-                    '--disable-setuid-sandbox',
-                    '--no-zygote',
-                    '--disable-accelerated-2d-canvas',
-                    '--no-first-run',
-                    '--no-default-browser-check',
-                    '--disable-extensions',
-                    '--disable-plugins'
-                ]
-            });
-            console.log('Browser initialized successfully');
-        },
-        '브라우저 초기화'
-    );
+    private initializeBrowserSafely = withErrorHandling(async (): Promise<void> => {
+        console.log('Initializing browser...');
+        this.browser = await chromium.launch({
+            headless: true,
+            executablePath: await chromiumBinary.executablePath(),
+            args: [
+                ...chromiumBinary.args,
+                '--no-sandbox',
+                '--disable-dev-shm-usage',
+                '--disable-gpu',
+                '--disable-features=VizDisplayCompositor',
+                '--disable-background-timer-throttling',
+                '--disable-backgrounding-occluded-windows',
+                '--disable-renderer-backgrounding',
+                '--disable-web-security',
+                '--single-process',
+                '--disable-setuid-sandbox',
+                '--no-zygote',
+                '--disable-accelerated-2d-canvas',
+                '--no-first-run',
+                '--no-default-browser-check',
+                '--disable-extensions',
+                '--disable-plugins',
+            ],
+        });
+        console.log('Browser initialized successfully');
+    }, '브라우저 초기화');
 
     // HOF로 래핑된 Job 찾기
-    private findJobSafely = withSyncErrorHandling(
-        (jobName: string): Job => {
-            const job = JobRegistry.getJobByName(jobName);
-            if (!job) {
-                throw new Error(`Job not found: ${jobName}. Available jobs: ${JobRegistry.getJobNames().join(', ')}`);
-            }
-            console.log(`Found job: ${job.jobName}`);
-            return job;
-        },
-        'Job 조회'
-    );
+    private findJobSafely = withSyncErrorHandling((jobName: string): Job => {
+        const job = JobRegistry.getJobByName(jobName);
+        if (!job) {
+            throw new Error(
+                `Job not found: ${jobName}. Available jobs: ${JobRegistry.getJobNames().join(', ')}`
+            );
+        }
+        console.log(`Found job: ${job.jobName}`);
+        return job;
+    }, 'Job 조회');
 
     // HOF로 래핑된 날짜 파싱
-    private parseDateSafely = withSyncErrorHandling(
-        (dateString: string): Date => {
-            const date = new Date(dateString);
-            if (isNaN(date.getTime())) {
-                throw new Error(`Invalid date format: ${dateString}`);
-            }
-            return date;
-        },
-        '날짜 파싱'
-    );
+    private parseDateSafely = withSyncErrorHandling((dateString: string): Date => {
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) {
+            throw new Error(`Invalid date format: ${dateString}`);
+        }
+        return date;
+    }, '날짜 파싱');
 
     // HOF로 래핑된 Job 실행
     private executeJobSafely = withErrorHandling(
@@ -196,11 +199,15 @@ export class CrawlingService {
         '빈 결과 S3 업로드'
     );
 
-    private createCrawlingResult(processedJobs: string[], s3Location: string, itemCount: number): CrawlingResult {
+    private createCrawlingResult(
+        processedJobs: string[],
+        s3Location: string,
+        itemCount: number
+    ): CrawlingResult {
         return {
             processedJobs,
             s3Location,
-            itemCount
+            itemCount,
         };
     }
 
@@ -211,4 +218,4 @@ export class CrawlingService {
             this.browser = null;
         }
     }
-} 
+}
