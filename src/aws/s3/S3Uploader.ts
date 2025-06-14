@@ -1,11 +1,6 @@
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { AppError, S3Error, ErrorCode } from '../../errors/AppError';
 
-export interface UploadOptions {
-    targetDate: string;
-    jobName: string;
-}
-
 export class S3Uploader {
     private static readonly DEFAULT_BUCKET_NAME = 'crawl-json-bucket';
     private static readonly DEFAULT_REGION = 'ap-northeast-2';
@@ -24,8 +19,8 @@ export class S3Uploader {
         });
     }
 
-    async uploadCrawlingResults(results: any[], options: UploadOptions): Promise<string> {
-        const fileName = this.generateFileName(options);
+    async uploadCrawlingResults(results: any[], targetDate: string, jobName: string): Promise<string> {
+        const fileName = this.generateFileName(targetDate, jobName);
         const jsonData = this.formatAsJson(results);
 
         return await this.uploadToS3(fileName, jsonData);
@@ -56,9 +51,9 @@ export class S3Uploader {
         }
     }
 
-    private generateFileName(options: UploadOptions): string {
+    private generateFileName(targetDate: string, jobName: string): string {
         const timestamp = new Date().toISOString().slice(0, 19).replace(/[T:]/g, '-');
-        return `${S3Uploader.FILE_PATH_PREFIX}/${options.targetDate}/${options.jobName}/${timestamp}.json`;
+        return `${S3Uploader.FILE_PATH_PREFIX}/${targetDate}/${jobName}/${timestamp}.json`;
     }
 
     private formatAsJson(results: any[]): string {

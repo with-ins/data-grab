@@ -27,19 +27,17 @@ export class CrawlingService {
     private browser: Browser | null = null;
     private jobExecutor: JobExecutor | null = null;
 
-    async executeCrawling(event: CrawlingEvent): Promise<Result<CrawlingResult>> {
-        const targetDate = event.targetDate;
-        const jobName = event.jobName;
-
+    async executeCrawling(targetDate: string, jobName: string): Promise<Result<CrawlingResult>> {
         const startTime = Date.now();
         console.log(`크롤링 시작 at ${getKoreaTimeISO()}`);
 
         try {
             // 입력 검증
-            validateEvent(event);
+            validateEvent(targetDate, jobName);
+            const parsedDate = new Date(targetDate);
 
             // 1단계: 브라우저 초기화
-            const browserResult = await this.initializeBrowserSafely();
+            const browserResult = await this.initializeBrowser();
             if (isFailure(browserResult)) {
                 return {
                     success: false,
@@ -53,7 +51,7 @@ export class CrawlingService {
             }
 
             // 2단계: Job 찾기
-            const jobResult = this.findJobSafely(jobName);
+            const jobResult = this.findJob(jobName);
             if (isFailure(jobResult)) {
                 return {
                     success: false,
@@ -62,20 +60,10 @@ export class CrawlingService {
                 };
             }
 
-            // 3단계: 날짜 파싱
-            const dateResult = this.parseDateSafely(targetDate);
-            if (isFailure(dateResult)) {
-                return {
-                    success: false,
-                    error: dateResult.error,
-                    context: 'Date parsing',
-                };
-            }
-
-            // 4단계: JobExecutor 실행
+            // 3단계: JobExecutor 실행
             this.jobExecutor = new JobExecutor(this.browser!);
-            const executionResult = await this.executeJobSafely(jobResult.data, {
-                targetDate: dateResult.data,
+            const executionResult = await this.executeJob(jobResult.data, {
+                targetDate: parsedDate,
             });
 
             if (isFailure(executionResult)) {
@@ -103,7 +91,7 @@ export class CrawlingService {
     }
 
     // HOF로 래핑된 브라우저 초기화
-    private initializeBrowserSafely = withErrorHandling(async (): Promise<void> => {
+    private initializeBrowser = withErrorHandling(async (): Promise<void> => {
         console.log('Initializing browser...');
         this.browser = await chromium.launch({
             headless: true,
@@ -132,7 +120,7 @@ export class CrawlingService {
     }, '브라우저 초기화');
 
     // HOF로 래핑된 Job 찾기
-    private findJobSafely = withSyncErrorHandling((jobName: string): Job => {
+    private findJob = withSyncErrorHandling((jobName: string): Job => {
         const job = JobRegistry.getJobByName(jobName);
         if (!job) {
             throw new Error(
@@ -143,17 +131,8 @@ export class CrawlingService {
         return job;
     }, 'Job 조회');
 
-    // HOF로 래핑된 날짜 파싱
-    private parseDateSafely = withSyncErrorHandling((dateString: string): Date => {
-        const date = new Date(dateString);
-        if (isNaN(date.getTime())) {
-            throw new Error(`Invalid date format: ${dateString}`);
-        }
-        return date;
-    }, '날짜 파싱');
-
     // HOF로 래핑된 Job 실행
-    private executeJobSafely = withErrorHandling(
+    private executeJob = withErrorHandling(
         async (job: Job, context: { targetDate: Date }) => {
             return await this.jobExecutor!.execute(job, context);
         },

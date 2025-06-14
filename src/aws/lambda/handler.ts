@@ -41,7 +41,7 @@ export const crawl = async (event: CrawlingEvent, context: Context): Promise<Cra
 
         // 1. 크롤링 실행
         const crawlingService = new CrawlingService();
-        const crawlingResult = await crawlingService.executeCrawling(event);
+        const crawlingResult = await crawlingService.executeCrawling(targetDate, jobName);
 
         if (isFailure(crawlingResult)) {
             return {
@@ -54,10 +54,7 @@ export const crawl = async (event: CrawlingEvent, context: Context): Promise<Cra
 
         // 2. S3 업로드
         const s3Service = new S3Service();
-        const uploadResult = await s3Service.uploadResults(crawlingResult.data.results, {
-            targetDate,
-            jobName,
-        });
+        const uploadResult = await s3Service.uploadResults(crawlingResult.data.results, targetDate, jobName);
 
         if (isFailure(uploadResult)) {
             return {
@@ -100,18 +97,4 @@ export const crawl = async (event: CrawlingEvent, context: Context): Promise<Cra
             timestamp: getKoreaTimeISO(),
         };
     }
-};
-
-// 헬스체크 핸들러 (선택사항)
-export const healthCheck = async (
-    event: any,
-    context: Context
-): Promise<{ status: string; timestamp: string; version: string }> => {
-    console.log('🏥 Health check called');
-
-    return {
-        status: 'healthy',
-        timestamp: new Date().toISOString(),
-        version: process.env.LAMBDA_VERSION || '1.0.0',
-    };
 };

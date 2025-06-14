@@ -48,11 +48,11 @@ export function validateJobName(jobName: string): void {
  * @param event 검증할 CrawlingEvent
  * @throws ValidationError 유효성 검증 실패 시
  */
-export function validateEvent(event: CrawlingEvent): void {
+export function validateEvent(targetDate: string, jobName: string): void {
     // targetDate 검증
-    validateDateFormat(event.targetDate);
-    validateDateValue(event.targetDate);
+    validateDateFormat(targetDate);
+    validateDateValue(targetDate);
 
     // jobName 검증
-    validateJobName(event.jobName);
+    validateJobName(jobName);
 } 
