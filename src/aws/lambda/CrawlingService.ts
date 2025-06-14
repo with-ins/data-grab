@@ -3,7 +3,6 @@ import { chromium } from 'playwright-core';
 import { JobRegistry } from '../../entity/job/JobRegistry';
 import { Job } from '../../entity/job/Job';
 import { JobExecutor } from '../../entity/job/JobExecutor';
-import { S3Service } from '../s3/S3Service';
 import { getKoreaTimeISO } from '../../utils/DateUtils';
 import { CrawlingEvent } from './handler';
 import { validateEvent } from './LambdaEventValidator';
@@ -20,18 +19,13 @@ const chromiumBinary = require('@sparticuz/chromium');
 
 export interface CrawlingResult {
     processedJobs: string[];
-    s3Location: string;
+    results: any[]; // 크롤링된 실제 데이터
     itemCount: number;
 }
 
 export class CrawlingService {
     private browser: Browser | null = null;
-    private s3Service: S3Service;
     private jobExecutor: JobExecutor | null = null;
-
-    constructor() {
-        this.s3Service = new S3Service();
-    }
 
     async executeCrawling(event: CrawlingEvent): Promise<Result<CrawlingResult>> {
         const targetDate = event.targetDate;
@@ -85,39 +79,11 @@ export class CrawlingService {
             });
 
             if (isFailure(executionResult)) {
-                // Job 실행 실패해도 빈 결과로 서비스 계속 진행
-                console.warn(
-                    `Job 실행 실패하지만 서비스 계속 진행:`,
-                    executionResult.error.message
-                );
-
-                const emptyUploadResult = await this.s3Service.uploadEmptyResult(targetDate, jobName);
-                if (isFailure(emptyUploadResult)) {
-                    return {
-                        success: false,
-                        error: new CrawlingError(
-                            `Job 실행 실패 후 빈 결과 업로드도 실패: ${emptyUploadResult.error.message}`,
-                            emptyUploadResult.error,
-                            'Empty result upload after job failure'
-                        ),
-                        context: 'Empty result upload after job failure',
-                    };
-                }
-
                 return {
-                    success: true,
-                    data: this.createCrawlingResult([], emptyUploadResult.data, 0),
+                    success: false,
+                    error: executionResult.error,
+                    context: 'Job execution',
                 };
-            }
-
-            // 5단계: S3 업로드
-            const uploadResult = await this.s3Service.uploadResults(executionResult.data.results, {
-                targetDate,
-                jobName,
-            });
-
-            if (isFailure(uploadResult)) {
-                return uploadResult;
             }
 
             const endTime = Date.now();
@@ -125,11 +91,11 @@ export class CrawlingService {
 
             return {
                 success: true,
-                data: this.createCrawlingResult(
-                    executionResult.data.processedJobs,
-                    uploadResult.data,
-                    executionResult.data.itemCount
-                ),
+                data: {
+                    processedJobs: executionResult.data.processedJobs,
+                    results: executionResult.data.results,
+                    itemCount: executionResult.data.itemCount,
+                },
             };
         } finally {
             await this.cleanup();
@@ -194,20 +160,8 @@ export class CrawlingService {
         'Job 실행'
     );
 
-    private createCrawlingResult(
-        processedJobs: string[],
-        s3Location: string,
-        itemCount: number
-    ): CrawlingResult {
-        return {
-            processedJobs,
-            s3Location,
-            itemCount,
-        };
-    }
-
     private async cleanup(): Promise<void> {
-        this.jobExecutor = null; // JobExecutor 참조 제거
+        this.jobExecutor = null;
         if (this.browser) {
             await this.browser.close();
             this.browser = null;
