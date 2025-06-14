@@ -2,6 +2,7 @@ import {
     withErrorHandling,
     withSyncErrorHandling,
 } from '../../src/utils/ErrorHandling';
+import { AppError } from '../../src/errors/AppError';
 
 describe('withErrorHandling', () => {
     it('정상적인 비동기 함수의 결과값을 Result 타입으로 변환하여 반환해야 한다', async () => {
@@ -11,10 +12,9 @@ describe('withErrorHandling', () => {
         //when
         const result = await sut(4);
         //then
-        expect(result).toEqual({
-            success: true,
-            data: 12,
-        });
+        const successResult = result as { success: boolean; data: number };
+        expect(successResult.success).toBe(true);
+        expect(successResult.data).toBe(12);
     });
 
     it('비동기 함수에서 발생한 에러를 Result 타입으로 변환하여 반환해야 한다', async () => {
@@ -26,11 +26,11 @@ describe('withErrorHandling', () => {
         //when
         const result = await sut();
         //then
-        expect(result).toEqual({
-            success: false,
-            error: new Error('async error'),
-            context: 'async-error-test',
-        });
+        const errorResult = result as { success: boolean; error: AppError; context: string };
+        expect(errorResult.success).toBe(false);
+        expect(errorResult.error).toBeInstanceOf(AppError);
+        expect(errorResult.error.message).toBe('Error: async error');
+        expect(errorResult.context).toBe('async-error-test');
     });
 });
 
@@ -42,10 +42,9 @@ describe('withSyncErrorHandling', () => {
         //when
         const result = sut(4);
         //then
-        expect(result).toEqual({
-            success: true,
-            data: 12,
-        });
+        const successResult = result as { success: boolean; data: number };
+        expect(successResult.success).toBe(true);
+        expect(successResult.data).toBe(12);
     });
 
     it('동기 함수에서 발생한 에러를 Result 타입으로 변환하여 반환해야 한다', () => {
@@ -57,10 +56,10 @@ describe('withSyncErrorHandling', () => {
         //when
         const result = sut();
         //then
-        expect(result).toEqual({
-            success: false,
-            error: new Error('sync error'),
-            context: 'sync-error-test',
-        });
+        const errorResult = result as { success: boolean; error: AppError; context: string };
+        expect(errorResult.success).toBe(false);
+        expect(errorResult.error).toBeInstanceOf(AppError);
+        expect(errorResult.error.message).toBe('Error: sync error');
+        expect(errorResult.context).toBe('sync-error-test');
     });
 });
