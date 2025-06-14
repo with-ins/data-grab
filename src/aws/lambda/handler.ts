@@ -117,7 +117,6 @@ export const healthCheck = async (
         version: process.env.LAMBDA_VERSION || '1.0.0',
     };
 };
-
 // 입력 검증
 function validateEvent(event: CrawlingEvent): void {
     // targetDate 형식 검증 - 'YYYY-MM-DD' 형식
@@ -138,3 +137,4 @@ function validateEvent(event: CrawlingEvent): void {
         throw new Error('jobName은 빈 문자열일 수 없습니다');
     }
 }
+

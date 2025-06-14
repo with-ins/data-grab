@@ -5,6 +5,8 @@ import { Job } from '../../entity/job/Job';
 import { JobExecutor } from '../../entity/job/JobExecutor';
 import { S3Uploader } from '../s3/S3Uploader';
 import { getKoreaTimeISO } from '../../utils/DateUtils';
+import { CrawlingEvent } from './handler';
+import { validateEvent } from './LambdaEventValidator';
 import {
     Result,
     withErrorHandling,
@@ -31,11 +33,14 @@ export class CrawlingService {
         this.s3Uploader = new S3Uploader();
     }
 
-    async executeCrawling(targetDate: string, jobName: string): Promise<Result<CrawlingResult>> {
+    async executeCrawling(targetDate: string, jobName: string, event: CrawlingEvent): Promise<Result<CrawlingResult>> {
         const startTime = Date.now();
         console.log(`크롤링 시작 at ${getKoreaTimeISO()}`);
 
         try {
+            // 입력 검증
+            validateEvent(event);
+
             // 1단계: 브라우저 초기화
             const browserResult = await this.initializeBrowserSafely();
             if (isFailure(browserResult)) {

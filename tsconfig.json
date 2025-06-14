@@ -14,7 +14,7 @@
   },
   "include": [
     "src/**/*"                  // 소스 폴더 포함
-  ],
+, "tests/aws/lambda/LambdaEventValidator.test.ts"  ],
   "exclude": [
     "node_modules",
     "dist",
