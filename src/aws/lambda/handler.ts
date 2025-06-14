@@ -14,6 +14,8 @@ export interface CrawlingEvent {
 export interface CrawlingResponse {
     success: boolean;
     message: string;
+    targetDate: string;
+    jobName: string;
     data?: {
         processedJobs: string[];
         s3Location: string;
@@ -47,6 +49,8 @@ export const crawl = async (event: CrawlingEvent, context: Context): Promise<Cra
             return {
                 success: false,
                 message: '크롤링 실패',
+                targetDate,
+                jobName,
                 error: crawlingResult.error.message,
                 timestamp: getKoreaTimeISO(),
             };
@@ -60,6 +64,8 @@ export const crawl = async (event: CrawlingEvent, context: Context): Promise<Cra
             return {
                 success: false,
                 message: '크롤링 성공했으나 S3 업로드 실패',
+                targetDate,
+                jobName,
                 error: uploadResult.error.message,
                 timestamp: getKoreaTimeISO(),
             };
@@ -70,6 +76,8 @@ export const crawl = async (event: CrawlingEvent, context: Context): Promise<Cra
         return {
             success: true,
             message: '크롤링 및 S3 업로드 성공',
+            targetDate,
+            jobName,
             data: {
                 processedJobs: crawlingResult.data.processedJobs,
                 s3Location: uploadResult.data,
@@ -93,6 +101,8 @@ export const crawl = async (event: CrawlingEvent, context: Context): Promise<Cra
         return {
             success: false,
             message: '시스템 에러',
+            targetDate: event.targetDate || new Date().toISOString().split('T')[0],
+            jobName: event.jobName,
             error: errorMessage,
             timestamp: getKoreaTimeISO(),
         };
