@@ -33,7 +33,10 @@ export class CrawlingService {
         this.s3Uploader = new S3Uploader();
     }
 
-    async executeCrawling(targetDate: string, jobName: string, event: CrawlingEvent): Promise<Result<CrawlingResult>> {
+    async executeCrawling(event: CrawlingEvent): Promise<Result<CrawlingResult>> {
+        const targetDate = event.targetDate;
+        const jobName = event.jobName;
+
         const startTime = Date.now();
         console.log(`크롤링 시작 at ${getKoreaTimeISO()}`);
 

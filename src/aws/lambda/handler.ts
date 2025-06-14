@@ -42,7 +42,7 @@ export const crawl = async (event: CrawlingEvent, context: Context): Promise<Cra
         console.log('크롤링 요청 인자', { targetDate, jobName });
 
         const crawlingService = new CrawlingService();
-        const result = await crawlingService.executeCrawling(targetDate, jobName);
+        const result = await crawlingService.executeCrawling(event);
 
         const duration = Date.now() - startTime;
 

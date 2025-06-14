@@ -1,8 +1,6 @@
 import {
     withErrorHandling,
     withSyncErrorHandling,
-    isSuccess,
-    isFailure,
 } from '../../src/utils/ErrorHandling';
 
 describe('withErrorHandling', () => {
