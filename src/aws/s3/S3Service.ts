@@ -1,0 +1,72 @@
+import { S3Uploader } from './S3Uploader';
+import { Result, withErrorHandling, isFailure } from '../../utils/ErrorHandling';
+import { S3Error } from '../../errors/AppError';
+
+export interface UploadMetadata {
+    targetDate: string;
+    jobName: string;
+}
+
+export class S3Service {
+    private s3Uploader: S3Uploader;
+
+    constructor() {
+        this.s3Uploader = new S3Uploader();
+    }
+
+    // HOF로 래핑된 S3 업로드
+    private uploadResultSafely = withErrorHandling(
+        async (results: any[], metadata: UploadMetadata): Promise<string> => {
+            return await this.s3Uploader.uploadCrawlingResults(results, metadata);
+        },
+        'S3 업로드'
+    );
+
+    // HOF로 래핑된 빈 결과 업로드
+    private uploadEmptyResultSafely = withErrorHandling(
+        async (targetDate: string, jobName: string): Promise<string> => {
+            return await this.s3Uploader.uploadCrawlingResults([], { targetDate, jobName });
+        },
+        '빈 결과 S3 업로드'
+    );
+
+    async uploadResults(results: any[], metadata: UploadMetadata): Promise<Result<string>> {
+        const uploadResult = await this.uploadResultSafely(results, metadata);
+        if (isFailure(uploadResult)) {
+            return {
+                success: false,
+                error: new S3Error(
+                    `S3 업로드 실패: ${uploadResult.error.message}`,
+                    uploadResult.error,
+                    'S3 upload'
+                ),
+                context: 'S3 upload',
+            };
+        }
+
+        return {
+            success: true,
+            data: uploadResult.data,
+        };
+    }
+
+    async uploadEmptyResult(targetDate: string, jobName: string): Promise<Result<string>> {
+        const emptyUploadResult = await this.uploadEmptyResultSafely(targetDate, jobName);
+        if (isFailure(emptyUploadResult)) {
+            return {
+                success: false,
+                error: new S3Error(
+                    `빈 결과 S3 업로드 실패: ${emptyUploadResult.error.message}`,
+                    emptyUploadResult.error,
+                    'Empty result S3 upload'
+                ),
+                context: 'Empty result S3 upload',
+            };
+        }
+
+        return {
+            success: true,
+            data: emptyUploadResult.data,
+        };
+    }
+} 

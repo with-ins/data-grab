@@ -3,7 +3,7 @@ import { chromium } from 'playwright-core';
 import { JobRegistry } from '../../entity/job/JobRegistry';
 import { Job } from '../../entity/job/Job';
 import { JobExecutor } from '../../entity/job/JobExecutor';
-import { S3Uploader } from '../s3/S3Uploader';
+import { S3Service } from '../s3/S3Service';
 import { getKoreaTimeISO } from '../../utils/DateUtils';
 import { CrawlingEvent } from './handler';
 import { validateEvent } from './LambdaEventValidator';
@@ -14,7 +14,7 @@ import {
     isSuccess,
     isFailure,
 } from '../../utils/ErrorHandling';
-import { AppError, CrawlingError, S3Error, ErrorCode } from '../../errors/AppError';
+import { AppError, CrawlingError, ErrorCode } from '../../errors/AppError';
 
 const chromiumBinary = require('@sparticuz/chromium');
 
@@ -26,11 +26,11 @@ export interface CrawlingResult {
 
 export class CrawlingService {
     private browser: Browser | null = null;
-    private s3Uploader: S3Uploader;
+    private s3Service: S3Service;
     private jobExecutor: JobExecutor | null = null;
 
     constructor() {
-        this.s3Uploader = new S3Uploader();
+        this.s3Service = new S3Service();
     }
 
     async executeCrawling(event: CrawlingEvent): Promise<Result<CrawlingResult>> {
@@ -91,7 +91,7 @@ export class CrawlingService {
                     executionResult.error.message
                 );
 
-                const emptyUploadResult = await this.uploadEmptyResultSafely(targetDate, jobName);
+                const emptyUploadResult = await this.s3Service.uploadEmptyResult(targetDate, jobName);
                 if (isFailure(emptyUploadResult)) {
                     return {
                         success: false,
@@ -111,21 +111,13 @@ export class CrawlingService {
             }
 
             // 5단계: S3 업로드
-            const uploadResult = await this.uploadResultSafely(executionResult.data.results, {
+            const uploadResult = await this.s3Service.uploadResults(executionResult.data.results, {
                 targetDate,
                 jobName,
             });
 
             if (isFailure(uploadResult)) {
-                return {
-                    success: false,
-                    error: new S3Error(
-                        `S3 업로드 실패: ${uploadResult.error.message}`,
-                        uploadResult.error,
-                        'S3 upload'
-                    ),
-                    context: 'S3 upload',
-                };
+                return uploadResult;
             }
 
             const endTime = Date.now();
@@ -200,22 +192,6 @@ export class CrawlingService {
             return await this.jobExecutor!.execute(job, context);
         },
         'Job 실행'
-    );
-
-    // HOF로 래핑된 S3 업로드
-    private uploadResultSafely = withErrorHandling(
-        async (results: any[], metadata: any): Promise<string> => {
-            return await this.s3Uploader.uploadCrawlingResults(results, metadata);
-        },
-        'S3 업로드'
-    );
-
-    // HOF로 래핑된 빈 결과 업로드
-    private uploadEmptyResultSafely = withErrorHandling(
-        async (targetDate: string, jobName: string): Promise<string> => {
-            return await this.s3Uploader.uploadCrawlingResults([], { targetDate, jobName });
-        },
-        '빈 결과 S3 업로드'
     );
 
     private createCrawlingResult(

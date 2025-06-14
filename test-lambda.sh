@@ -42,7 +42,7 @@ echo "📋 Test 2: Single Job Crawling"
 curl -XPOST "${LAMBDA_URL}" \
   -H "Content-Type: application/json" \
   -d '{
-    "syncDate": "2024-01-15",
+    "targetDate": "2024-01-15",
     "jobName": "오정노인복지관"
   }' | jq '.' 2>/dev/null || echo ""
 
@@ -52,7 +52,7 @@ echo "📋 Test 3: All Jobs Crawling (May take longer)"
 curl -XPOST "${LAMBDA_URL}" \
   -H "Content-Type: application/json" \
   -d '{
-    "syncDate": "2024-01-15"
+    "targetDate": "2024-01-15"
   }' | jq '.' 2>/dev/null || echo ""
 
 echo -e "\n============================================================\n"
@@ -61,7 +61,7 @@ echo "📋 Test 4: Invalid Date Format (Should Fail)"
 curl -XPOST "${LAMBDA_URL}" \
   -H "Content-Type: application/json" \
   -d '{
-    "syncDate": "2024/01/15",
+    "targetDate": "2024/01/15",
     "jobName": "오정노인복지관"
   }' | jq '.' 2>/dev/null || echo ""
 
