@@ -22,6 +22,7 @@ export interface CrawlingResponse {
         itemCount: number;
         duration: number;
     };
+    // TODO 디버깅하기 쉽게 에러 메시지가 좀 더 구체적으로 명시되어야 할지 고민
     error?: string;
     timestamp: string;
 }
