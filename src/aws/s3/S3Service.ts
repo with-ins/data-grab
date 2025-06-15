@@ -1,6 +1,7 @@
 import { S3Uploader } from './S3Uploader';
 import { Result, withErrorHandling, isFailure } from '../../utils/ErrorHandling';
 import { S3Error } from '../../errors/AppError';
+import { TargetDate } from '../../entity/TargetDate';
 
 export class S3Service {
     private s3Uploader: S3Uploader;
@@ -11,21 +12,21 @@ export class S3Service {
 
     // HOF로 래핑된 S3 업로드
     private uploadResultSafely = withErrorHandling(
-        async (results: any[], targetDate: string, jobName: string): Promise<string> => {
-            return await this.s3Uploader.uploadCrawlingResults(results, targetDate, jobName);
+        async (results: any[], targetDate: TargetDate, jobName: string): Promise<string> => {
+            return await this.s3Uploader.uploadCrawlingResults(results, targetDate.value, jobName);
         },
         'S3 업로드'
     );
 
     // HOF로 래핑된 빈 결과 업로드
     private uploadEmptyResultSafely = withErrorHandling(
-        async (targetDate: string, jobName: string): Promise<string> => {
-            return await this.s3Uploader.uploadCrawlingResults([], targetDate, jobName);
+        async (targetDate: TargetDate, jobName: string): Promise<string> => {
+            return await this.s3Uploader.uploadCrawlingResults([], targetDate.value, jobName);
         },
         '빈 결과 S3 업로드'
     );
 
-    async uploadResults(results: any[], targetDate: string, jobName: string): Promise<Result<string>> {
+    async uploadResults(results: any[], targetDate: TargetDate, jobName: string): Promise<Result<string>> {
         const uploadResult = await this.uploadResultSafely(results, targetDate, jobName);
         if (isFailure(uploadResult)) {
             return {
@@ -45,7 +46,7 @@ export class S3Service {
         };
     }
 
-    async uploadEmptyResult(targetDate: string, jobName: string): Promise<Result<string>> {
+    async uploadEmptyResult(targetDate: TargetDate, jobName: string): Promise<Result<string>> {
         const emptyUploadResult = await this.uploadEmptyResultSafely(targetDate, jobName);
         if (isFailure(emptyUploadResult)) {
             return {

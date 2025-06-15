@@ -3,6 +3,8 @@ import { CrawlingService } from './CrawlingService';
 import { S3Service } from '../s3/S3Service';
 import { getKoreaTimeISO } from '../../utils/DateUtils';
 import { isSuccess, isFailure } from '../../utils/ErrorHandling';
+import { TargetDate } from '../../entity/TargetDate';
+import { validateEvent } from './LambdaEventValidator';
 
 // Lambda Invocation용 이벤트 인터페이스
 export interface CrawlingEvent {
@@ -35,12 +37,13 @@ export const crawl = async (event: CrawlingEvent, context: Context): Promise<Cra
         remainingTimeInMillis: context.getRemainingTimeInMillis(),
     });
 
-    try {
-        // 기본값 설정
-        const targetDate = event.targetDate || new Date().toISOString().split('T')[0];
-        const jobName = event.jobName;
+    // 기본 TargetDate 설정
+    validateEvent(event);
+    const targetDate = TargetDate.from(event.targetDate)
+    const jobName = event.jobName;
 
-        console.log('크롤링 요청 인자', { targetDate, jobName });
+    try {
+        console.log('크롤링 요청 인자', { targetDate: targetDate.value, jobName });
 
         // 1. 크롤링 실행
         const crawlingService = new CrawlingService();
@@ -50,7 +53,7 @@ export const crawl = async (event: CrawlingEvent, context: Context): Promise<Cra
             return {
                 success: false,
                 message: '크롤링 실패',
-                targetDate,
+                targetDate: targetDate.value,
                 jobName,
                 error: crawlingResult.error.message,
                 timestamp: getKoreaTimeISO(),
@@ -65,7 +68,7 @@ export const crawl = async (event: CrawlingEvent, context: Context): Promise<Cra
             return {
                 success: false,
                 message: '크롤링 성공했으나 S3 업로드 실패',
-                targetDate,
+                targetDate: targetDate.value,
                 jobName,
                 error: uploadResult.error.message,
                 timestamp: getKoreaTimeISO(),
@@ -77,7 +80,7 @@ export const crawl = async (event: CrawlingEvent, context: Context): Promise<Cra
         return {
             success: true,
             message: '크롤링 및 S3 업로드 성공',
-            targetDate,
+            targetDate: targetDate.value,
             jobName,
             data: {
                 processedJobs: crawlingResult.data.processedJobs,
@@ -102,7 +105,7 @@ export const crawl = async (event: CrawlingEvent, context: Context): Promise<Cra
         return {
             success: false,
             message: '시스템 에러',
-            targetDate: event.targetDate || new Date().toISOString().split('T')[0],
+            targetDate: targetDate.value,
             jobName: event.jobName,
             error: errorMessage,
             timestamp: getKoreaTimeISO(),
