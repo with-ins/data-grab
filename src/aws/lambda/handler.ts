@@ -5,6 +5,7 @@ import { getKoreaTimeISO } from '../../utils/DateUtils';
 import { isSuccess, isFailure } from '../../utils/ErrorHandling';
 import { TargetDate } from '../../entity/TargetDate';
 import { validateEvent } from './LambdaEventValidator';
+import { ERROR_MESSAGES } from '../../constants/ErrorMessages';
 
 // Lambda Invocation용 이벤트 인터페이스
 export interface CrawlingEvent {
@@ -52,7 +53,7 @@ export const crawl = async (event: CrawlingEvent, context: Context): Promise<Cra
         if (isFailure(crawlingResult)) {
             return {
                 success: false,
-                message: '크롤링 실패',
+                message: crawlingResult.context || ERROR_MESSAGES.CRAWLING_FAILED,
                 targetDate: targetDate.value,
                 jobName,
                 error: crawlingResult.error.message,
@@ -67,7 +68,7 @@ export const crawl = async (event: CrawlingEvent, context: Context): Promise<Cra
         if (isFailure(uploadResult)) {
             return {
                 success: false,
-                message: '크롤링 성공했으나 S3 업로드 실패',
+                message: uploadResult.context || ERROR_MESSAGES.CRAWLING_SUCCESS_UPLOAD_FAILED,
                 targetDate: targetDate.value,
                 jobName,
                 error: uploadResult.error.message,
@@ -79,7 +80,7 @@ export const crawl = async (event: CrawlingEvent, context: Context): Promise<Cra
         const duration = Date.now() - startTime;
         return {
             success: true,
-            message: '크롤링 및 S3 업로드 성공',
+            message: ERROR_MESSAGES.SUCCESS,
             targetDate: targetDate.value,
             jobName,
             data: {
@@ -104,7 +105,7 @@ export const crawl = async (event: CrawlingEvent, context: Context): Promise<Cra
 
         return {
             success: false,
-            message: '시스템 에러',
+            message: ERROR_MESSAGES.SYSTEM_ERROR,
             targetDate: targetDate.value,
             jobName: event.jobName,
             error: errorMessage,

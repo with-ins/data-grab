@@ -15,6 +15,7 @@ import {
     isFailure,
 } from '../../utils/ErrorHandling';
 import { AppError, CrawlingError, ErrorCode } from '../../errors/AppError';
+import { OPERATION_CONTEXT } from '../../constants/OperationContext';
 
 const chromiumBinary = require('@sparticuz/chromium');
 
@@ -45,9 +46,9 @@ export class CrawlingService {
                     error: new CrawlingError(
                         `브라우저 초기화 실패: ${browserResult.error.message}`,
                         browserResult.error,
-                        'Browser initialization'
+                        OPERATION_CONTEXT.BROWSER_INIT
                     ),
-                    context: 'Browser initialization',
+                    context: OPERATION_CONTEXT.BROWSER_INIT,
                 };
             }
 
@@ -57,7 +58,7 @@ export class CrawlingService {
                 return {
                     success: false,
                     error: jobResult.error,
-                    context: 'Job lookup',
+                    context: OPERATION_CONTEXT.JOB_LOOKUP,
                 };
             }
 
@@ -71,7 +72,7 @@ export class CrawlingService {
                 return {
                     success: false,
                     error: executionResult.error,
-                    context: 'Job execution',
+                    context: OPERATION_CONTEXT.JOB_EXECUTION,
                 };
             }
 
@@ -118,7 +119,7 @@ export class CrawlingService {
             ],
         });
         console.log('Browser initialized successfully');
-    }, '브라우저 초기화');
+    }, OPERATION_CONTEXT.BROWSER_INIT);
 
     // HOF로 래핑된 Job 찾기
     private findJob = withSyncErrorHandling((jobName: string): Job => {
@@ -130,14 +131,14 @@ export class CrawlingService {
         }
         console.log(`Found job: ${job.jobName}`);
         return job;
-    }, 'Job 조회');
+    }, OPERATION_CONTEXT.JOB_LOOKUP);
 
     // HOF로 래핑된 Job 실행
     private executeJob = withErrorHandling(
         async (job: Job, context: { targetDate: Date }) => {
             return await this.jobExecutor!.execute(job, context);
         },
-        'Job 실행'
+        OPERATION_CONTEXT.JOB_EXECUTION
     );
 
     private async cleanup(): Promise<void> {

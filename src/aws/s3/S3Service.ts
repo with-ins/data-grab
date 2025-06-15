@@ -2,6 +2,7 @@ import { S3Uploader } from './S3Uploader';
 import { Result, withErrorHandling, isFailure } from '../../utils/ErrorHandling';
 import { S3Error } from '../../errors/AppError';
 import { TargetDate } from '../../entity/TargetDate';
+import { OPERATION_CONTEXT } from '../../constants/OperationContext';
 
 export class S3Service {
     private s3Uploader: S3Uploader;
@@ -15,7 +16,7 @@ export class S3Service {
         async (results: any[], targetDate: TargetDate, jobName: string): Promise<string> => {
             return await this.s3Uploader.uploadCrawlingResults(results, targetDate.value, jobName);
         },
-        'S3 업로드'
+        OPERATION_CONTEXT.S3_UPLOAD
     );
 
     // HOF로 래핑된 빈 결과 업로드
@@ -23,7 +24,7 @@ export class S3Service {
         async (targetDate: TargetDate, jobName: string): Promise<string> => {
             return await this.s3Uploader.uploadCrawlingResults([], targetDate.value, jobName);
         },
-        '빈 결과 S3 업로드'
+        OPERATION_CONTEXT.S3_EMPTY_UPLOAD
     );
 
     async uploadResults(results: any[], targetDate: TargetDate, jobName: string): Promise<Result<string>> {
@@ -34,9 +35,9 @@ export class S3Service {
                 error: new S3Error(
                     `S3 업로드 실패: ${uploadResult.error.message}`,
                     uploadResult.error,
-                    'S3 upload'
+                    OPERATION_CONTEXT.S3_UPLOAD
                 ),
-                context: 'S3 upload',
+                context: OPERATION_CONTEXT.S3_UPLOAD,
             };
         }
 
@@ -54,9 +55,9 @@ export class S3Service {
                 error: new S3Error(
                     `빈 결과 S3 업로드 실패: ${emptyUploadResult.error.message}`,
                     emptyUploadResult.error,
-                    'Empty result S3 upload'
+                    OPERATION_CONTEXT.S3_EMPTY_UPLOAD
                 ),
-                context: 'Empty result S3 upload',
+                context: OPERATION_CONTEXT.S3_EMPTY_UPLOAD,
             };
         }
 
