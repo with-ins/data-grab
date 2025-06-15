@@ -5,7 +5,6 @@ import {
     validateJobName,
 } from '../../../src/aws/lambda/LambdaEventValidator';
 import { CrawlingEvent } from '../../../src/aws/lambda/handler';
-import { ValidationError } from '../../../src/errors/AppError';
 
 describe('LambdaEventValidator', () => {
     describe('validateDateFormat', () => {
@@ -26,8 +25,7 @@ describe('LambdaEventValidator', () => {
 
             //when then
             invalidFormats.forEach((date) => {
-                expect(() => validateDateFormat(date)).toThrow(ValidationError);
-                expect(() => validateDateFormat(date)).toThrow('targetDate는 YYYY-MM-DD 형식이여야 합니다');
+                expect(() => validateDateFormat(date)).toThrow('targetDate는 YYYY-MM-DD 형식이어야 합니다');
             });
         });
     });
@@ -48,7 +46,6 @@ describe('LambdaEventValidator', () => {
 
             //when then
             invalidDates.forEach((date) => {
-                expect(() => validateDateValue(date)).toThrow(ValidationError);
                 expect(() => validateDateValue(date)).toThrow('유효하지 않은 날짜입니다');
             });
         });
@@ -66,7 +63,6 @@ describe('LambdaEventValidator', () => {
 
             //when then
             invalidJobNames.forEach((jobName) => {
-                expect(() => validateJobName(jobName)).toThrow(ValidationError);
                 expect(() => validateJobName(jobName)).toThrow('jobName은 빈 문자열일 수 없습니다');
             });
         });

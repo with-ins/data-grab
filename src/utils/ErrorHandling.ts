@@ -1,11 +1,12 @@
-import { AppError, ErrorCode } from '../errors/AppError';
+import { AppError } from '../errors/AppError';
+import { OPERATION_CONTEXT } from '../constants/OperationContext';
 
 /**
  * Result 타입 - 성공 또는 실패를 나타내는 타입
  */
 export type Result<T, E = AppError> = 
   | { success: true; data: T }
-  | { success: false; error: E; context?: string };
+  | { success: false; error: E; context: string };
 
 /**
  * HOF(고차함수): 비동기 함수를 래핑하여 예외를 Result 타입으로 변환
@@ -24,13 +25,12 @@ export function withErrorHandling<T, A extends any[]>(
       const errorInstance = error instanceof AppError 
         ? error 
         : new AppError(
-            String(error),
-            ErrorCode.UNKNOWN,
+            error instanceof Error ? error.message : String(error),
             context,
-            error
+            error instanceof Error ? error : undefined
           );
       
-      console.error(`[${context}] 실패:`, errorInstance.toJSON());
+      console.warn(`[${context}] 실패:`, errorInstance.toJSON());
       
       return { 
         success: false, 
@@ -58,10 +58,9 @@ export function withSyncErrorHandling<T, A extends any[]>(
       const errorInstance = error instanceof AppError 
         ? error 
         : new AppError(
-            String(error),
-            ErrorCode.UNKNOWN,
+            error instanceof Error ? error.message : String(error),
             context,
-            error
+            error instanceof Error ? error : undefined
           );
       
       console.error(`[${context}] 실패:`, errorInstance.toJSON());
@@ -82,8 +81,34 @@ export function isSuccess<T, E>(result: Result<T, E>): result is { success: true
   return result.success;
 }
 
-export function isFailure<T, E>(result: Result<T, E>): result is { success: false; error: E; context?: string } {
+export function isFailure<T, E>(result: Result<T, E>): result is { success: false; error: E; context: string } {
   return !result.success;
+}
+
+/**
+ * Result 헬퍼 함수들 - 중복 코드 제거를 위한 유틸리티
+ */
+export function success<T>(data: T): Result<T> {
+  return { success: true, data };
+}
+
+export function failure<T>(error: AppError, context?: string): Result<T> {
+  return { success: false, error, context };
+}
+
+/**
+ * Error를 AppError로 변환하는 헬퍼 함수
+ */
+export function wrapError<T>(
+  error: unknown, 
+  message: string, 
+  context: string
+): Result<T> {
+  const errorInstance = error instanceof AppError 
+    ? error 
+    : new AppError(message, context, error instanceof Error ? error : undefined);
+  
+  return failure(errorInstance, context);
 }
 
 // /**

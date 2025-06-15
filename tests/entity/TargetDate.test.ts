@@ -1,5 +1,5 @@
 import { TargetDate } from '../../src/entity/TargetDate';
-import { ValidationError } from '../../src/errors/AppError';
+import { AppError } from '../../src/errors/AppError';
 
 describe('TargetDate', () => {
     describe('getter properties', () => {

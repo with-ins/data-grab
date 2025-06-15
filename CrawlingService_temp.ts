@@ -44,7 +44,15 @@ export class CrawlingService {
             // 1단계: 브라우저 초기화
             const browserResult = await this.initializeBrowser();
             if (isFailure(browserResult)) {
-                return failure(browserResult.error, OPERATION_CONTEXT.BROWSER_INIT);
+                return failure(
+                    new AppError(
+                        ERROR_MESSAGES.BROWSER_INIT_FAILED,
+                        OPERATION_CONTEXT.BROWSER_INIT,
+                        browserResult.error instanceof Error ? browserResult.error : undefined,
+                        { targetDate: targetDate.value, jobName }
+                    ),
+                    OPERATION_CONTEXT.BROWSER_INIT
+                );
             }
 
             // 2단계: Job 찾기

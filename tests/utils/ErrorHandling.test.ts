@@ -30,7 +30,8 @@ describe('ErrorHandling', () => {
             const errorResult = result as { success: boolean; error: AppError; context: string };
             expect(errorResult.success).toBe(false);
             expect(errorResult.error).toBeInstanceOf(AppError);
-            expect(errorResult.error.message).toBe('Error: async error');
+            expect(errorResult.error.message).toBe('async error');
+            expect(errorResult.error.context).toBe('async-error-test');
             expect(errorResult.context).toBe('async-error-test');
         });
     });
@@ -60,7 +61,8 @@ describe('ErrorHandling', () => {
             const errorResult = result as { success: boolean; error: AppError; context: string };
             expect(errorResult.success).toBe(false);
             expect(errorResult.error).toBeInstanceOf(AppError);
-            expect(errorResult.error.message).toBe('Error: sync error');
+            expect(errorResult.error.message).toBe('sync error');
+            expect(errorResult.error.context).toBe('sync-error-test');
             expect(errorResult.context).toBe('sync-error-test');
         });
     });

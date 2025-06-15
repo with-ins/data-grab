@@ -1,4 +1,4 @@
-import { ValidationError } from '../errors/AppError';
+import { AppError } from '../errors/AppError';
 
 /**
  * 크롤링 대상 날짜를 나타내는 Value Object

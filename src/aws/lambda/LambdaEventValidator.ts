@@ -1,22 +1,29 @@
 import { CrawlingEvent } from './handler';
-import { ValidationError } from '../../errors/AppError';
+import { AppError } from '../../errors/AppError';
+import { ERROR_MESSAGES } from '../../constants/ErrorMessages';
+import { OPERATION_CONTEXT } from '../../constants/OperationContext';
 
 /**
  * targetDate가 YYYY-MM-DD 형식인지 검증합니다.
  * @param targetDate 검증할 날짜 문자열
- * @throws ValidationError 형식이 맞지 않을 경우
+ * @throws AppError 형식이 맞지 않을 경우
  */
 export function validateDateFormat(targetDate: string): void {
     const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
     if (!dateRegex.test(targetDate)) {
-        throw new ValidationError('targetDate는 YYYY-MM-DD 형식이여야 합니다', 'validateDateFormat');
+        throw new AppError(
+            ERROR_MESSAGES.INVALID_DATE_FORMAT,
+            OPERATION_CONTEXT.TARGET_DATE_VALIDATION,
+            undefined,
+            { inputValue: targetDate, expectedFormat: 'YYYY-MM-DD' }
+        );
     }
 }
 
 /**
  * targetDate가 유효한 날짜인지 검증합니다.
  * @param targetDate 검증할 날짜 문자열
- * @throws ValidationError 유효하지 않은 날짜일 경우
+ * @throws AppError 유효하지 않은 날짜일 경우
  */
 export function validateDateValue(targetDate: string): void {
     const [year, month, day] = targetDate.split('-').map(Number);
@@ -28,25 +35,35 @@ export function validateDateValue(targetDate: string): void {
         date.getMonth() !== month - 1 ||
         date.getDate() !== day
     ) {
-        throw new ValidationError('유효하지 않은 날짜입니다', 'validateDateValue');
+        throw new AppError(
+            ERROR_MESSAGES.INVALID_DATE_VALUE,
+            OPERATION_CONTEXT.TARGET_DATE_VALIDATION,
+            undefined,
+            { inputValue: targetDate, parsedDate: date.toISOString() }
+        );
     }
 }
 
 /**
  * jobName이 유효한지 검증합니다.
  * @param jobName 검증할 jobName
- * @throws ValidationError jobName이 빈 문자열이거나 공백만 있는 경우
+ * @throws AppError jobName이 빈 문자열이거나 공백만 있는 경우
  */
 export function validateJobName(jobName: string): void {
     if (jobName.trim().length === 0) {
-        throw new ValidationError('jobName은 빈 문자열일 수 없습니다', 'validateJobName');
+        throw new AppError(
+            ERROR_MESSAGES.EMPTY_JOB_NAME,
+            OPERATION_CONTEXT.JOB_NAME_VALIDATION,
+            undefined,
+            { inputValue: jobName }
+        );
     }
 }
 
 /**
  * Lambda 이벤트의 유효성을 검증합니다.
  * @param event 검증할 CrawlingEvent
- * @throws ValidationError 유효성 검증 실패 시
+ * @throws AppError 유효성 검증 실패 시
  */
 export function validateEvent(event: CrawlingEvent): void {
     // targetDate 검증

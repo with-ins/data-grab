@@ -1,5 +1,7 @@
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
-import { AppError, S3Error, ErrorCode } from '../../errors/AppError';
+import { AppError } from '../../errors/AppError';
+import { ERROR_MESSAGES } from '../../constants/ErrorMessages';
+import { OPERATION_CONTEXT } from '../../constants/OperationContext';
 
 export class S3Uploader {
     private static readonly DEFAULT_BUCKET_NAME = 'crawl-json-bucket';
@@ -43,10 +45,15 @@ export class S3Uploader {
             return location;
         } catch (error) {
             console.error('Error uploading file to S3:', error);
-            throw new S3Error(
-                `Failed to upload file to S3: ${error instanceof Error ? error.message : 'Unknown error'}`,
-                error,
-                'S3Uploader.uploadToS3'
+            throw new AppError(
+                ERROR_MESSAGES.S3_UPLOAD_FAILED,
+                OPERATION_CONTEXT.S3_UPLOAD,
+                error instanceof Error ? error : undefined,
+                { 
+                    bucketName: this.bucketName,
+                    filePath,
+                    errorDetail: error instanceof Error ? error.message : 'Unknown error'
+                }
             );
         }
     }
