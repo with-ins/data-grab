@@ -127,10 +127,7 @@ export class CrawlingService {
     private executeJob = withErrorHandling(
         async (job: Job, context: { targetDate: Date }) => {
             const result = await this.jobExecutor!.execute(job, context);
-            if (isFailure(result)) {
-                throw result.error;
-            }
-            return result.data;
+            return result;
         },
         OPERATION_CONTEXT.JOB_EXECUTION
     );

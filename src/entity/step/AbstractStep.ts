@@ -1,6 +1,6 @@
 import { Step } from './Step';
 import { Page } from 'playwright-core';
-import { isDateAfter } from '../../utils/DateUtils';
+import { isEqualOrAfterDateOnly } from '../../utils/DateUtils';
 
 export abstract class AbstractStep implements Step {
     async run(page: Page, syncDate: Date, baseUrl: string): Promise<Record<string, any[]>> {
@@ -15,7 +15,7 @@ export abstract class AbstractStep implements Step {
 
         for (const [key, value] of Object.entries(result)) {
             // 배열 내부 객체들을 필터링
-            const filtered = value.filter((item) => isDateAfter(syncDate, item.createdAt));
+            const filtered = value.filter((item) => isEqualOrAfterDateOnly(syncDate, item.createdAt));
 
             if (filtered.length > 0) {
                 result[key] = filtered;

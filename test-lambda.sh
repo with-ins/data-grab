@@ -42,7 +42,7 @@ echo "📋 Test 2: Single Job Crawling"
 curl -XPOST "${LAMBDA_URL}" \
   -H "Content-Type: application/json" \
   -d '{
-    "targetDate": "2024-01-15",
+    "targetDate": "2025-06-13",
     "jobName": "오정노인복지관"
   }' | jq '.' 2>/dev/null || echo ""
 

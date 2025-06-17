@@ -2,7 +2,7 @@ import { AbstractJob } from '../../AbstractJob';
 import { SimpleTemplateStep } from '../../../step/SimpleTemplateStep';
 import { Locator, Page } from 'playwright-core';
 import { Category } from '../../../Category';
-import { parseDate, isDateAfter } from '../../../../utils/DateUtils';
+import { parseDate, isEqualOrAfterDateOnly } from '../../../../utils/DateUtils';
 import { AbstractStep } from '../../../step/AbstractStep';
 import { Optimize, Optimizer } from '../../../Optimize';
 
@@ -61,7 +61,7 @@ class 미추홀소식 extends AbstractStep {
             dateStr = ('20' + dateStr).slice(0, 10);
             const createdAt = parseDate(dateStr, '-');
 
-            if (!isDateAfter(syncDate, createdAt)) break;
+            if (!isEqualOrAfterDateOnly(syncDate, createdAt)) break;
 
             list.push({
                 id: parseInt(id),

@@ -39,32 +39,7 @@ docker-compose -f docker-compose.local.yml up --build -d
 ./test-lambda.sh
 ```
 
-또는 직접 curl 명령어로 테스트:
 
-```bash
-# 단일 Job 크롤링 테스트
-curl -XPOST "http://localhost:9000/2015-03-31/functions/function/invocations" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "syncDate": "2024-01-15",
-    "jobName": "오정노인복지관"
-  }'
-
-# 전체 Job 크롤링 테스트
-curl -XPOST "http://localhost:9000/2015-03-31/functions/function/invocations" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "syncDate": "2024-01-15"
-  }'
-
-# 입력 검증 테스트 (실패 예상)
-curl -XPOST "http://localhost:9000/2015-03-31/functions/function/invocations" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "syncDate": "2024/01/15",
-    "jobName": "오정노인복지관"
-  }'
-```
 
 ### **3. 결과 확인**
 
@@ -178,13 +153,14 @@ docker-compose -f docker-compose.local.yml down -v
 {
   "success": true,
   "message": "Crawling completed successfully",
+  "targetDate": "2024-01-15",
+  "jobName": "오정노인복지관",
   "data": {
     "processedJobs": ["오정노인복지관"],
     "s3Location": "http://minio:9000/crawl-json-bucket/crawling-results/2024-01-15/...",
     "itemCount": 36,
     "duration": 8520
   },
-  "requestId": "test-request-001",
-  "timestamp": "2025-06-10T12:34:55.383Z"
+  "timestamp": "2025-01-15T12:34:55.383Z"
 }
 ``` 
