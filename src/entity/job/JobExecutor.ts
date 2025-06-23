@@ -60,16 +60,14 @@ export class JobExecutor {
                 { jobName: job.jobName }
             );
         } finally {
-            if (page) {
-                await page.close();
-            }
+            await page?.close();
         }
     }
 
     private async createPage(options?: PageOptions): Promise<Page> {
         const page = await this.browser.newPage();
 
-        const viewport = options?.viewport || { width: 1280, height: 720 };
+        const viewport = options?.viewport || { width: 800, height: 600 };
         await page.setViewportSize(viewport);
 
         if (options?.timeout) {
