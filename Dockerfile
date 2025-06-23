@@ -17,13 +17,6 @@ RUN npm run build
 # === 런타임 스테이지 ===
 FROM public.ecr.aws/lambda/nodejs:22
 
-# Playwright Chromium 실행을 위한 필수 시스템 패키지 설치
-RUN dnf install -y \
-    nss atk cups-libs gtk3 libXcomposite libXcursor \
-    libXdamage libXext libXi libXrandr libXScrnSaver \
-    libXtst pango alsa-lib && \
-    dnf clean all
-
 # 작업 디렉토리 설정
 WORKDIR ${LAMBDA_TASK_ROOT}
 
@@ -31,12 +24,8 @@ WORKDIR ${LAMBDA_TASK_ROOT}
 COPY package*.json ./
 RUN npm ci --only=production
 
-# Playwright 브라우저 설치 (headless shell 사용)
-RUN npx playwright install chromium-headless-shell
-RUN npx playwright install-deps chromium
-
 # 빌드된 파일들을 빌더 스테이지에서 복사
 COPY --from=builder /build/dist/ ./
 
 # Lambda 핸들러 설정
-CMD ["lambda/handler.crawl"] 
+CMD ["aws/lambda/handler.crawl"] 

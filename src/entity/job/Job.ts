@@ -1,8 +1,6 @@
-import {Page} from "playwright";
-
+import { Page } from 'playwright-core';
 
 export interface Job {
-
     jobName: string;
 
     /**
@@ -16,6 +14,5 @@ export interface Job {
      * }
      * 단일 구조임
      */
-    run(page: Page, syncDate: Date): Promise<Record<string, any[]>>;
-
+    run(page: Page, targetDate: Date): Promise<Record<string, any[]>>;
 }

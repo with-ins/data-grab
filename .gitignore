@@ -17,3 +17,10 @@ results.json
 dist/
 serverless.yml
 .serverless
+
+# Local testing (로컬 테스트 관련)
+# Note: 로컬 테스트 파일들은 git에 포함됨
+# - Dockerfile.local
+# - docker-compose.local.yml  
+# - README.local-test.md
+# - test-lambda.sh
