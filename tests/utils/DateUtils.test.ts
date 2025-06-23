@@ -3,15 +3,12 @@ import { getKoreaTimeISO, parseDate, isEqualOrAfterDateOnly } from '../../src/ut
 describe('DateUtils', () => {
     describe('getKoreaTimeISO', () => {
         it('ISO 형식과 한국 시간대 확인', () => {
+            //given
             const result = getKoreaTimeISO();
             
+            //when then
             // ISO 형식 검증 (YYYY-MM-DDTHH:mm:ss+09:00)
             expect(result).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\+09:00$/);
-            
-            // 한국 시간대 검증
-            const date = new Date(result);
-            const koreaOffset = date.getTimezoneOffset();
-            expect(koreaOffset).toBe(-540); // UTC+9 (9 * 60 = 540 minutes)
         });
     });
 
