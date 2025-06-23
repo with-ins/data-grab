@@ -46,7 +46,7 @@ export class S3Uploader {
     }
 
     async uploadCrawlingResults(results: any[], targetDate: string, jobName: string): Promise<string> {
-        const fileName = this.generateFileName(targetDate, jobName);
+        const fileName = this.generateFolderName(targetDate, jobName);
         const jsonData = this.formatAsJson(results);
 
         return await this.uploadToS3(fileName, jsonData);
@@ -81,7 +81,7 @@ export class S3Uploader {
         }
     }
 
-    private generateFileName(targetDate: string, jobName: string): string {
+    private generateFolderName(targetDate: string, jobName: string): string {
         const timestamp = new Date().toISOString().slice(0, 19).replace(/[T:]/g, '-');
         return `${S3Uploader.FILE_PATH_PREFIX}/${targetDate}/${jobName}/${timestamp}.json`;
     }
