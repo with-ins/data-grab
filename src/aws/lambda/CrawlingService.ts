@@ -47,7 +47,7 @@ export class CrawlingService {
                 return failure(browserResult.error, OPERATION_CONTEXT.BROWSER_INIT);
             }
 
-            // 2단계: Job 찾기9998uikjmuy9jmjnm
+            // 2단계: Job 찾기
             const jobResult = this.findJob(jobName);
             if (isFailure(jobResult)) {
                 return failure(jobResult.error, OPERATION_CONTEXT.JOB_LOOKUP);
