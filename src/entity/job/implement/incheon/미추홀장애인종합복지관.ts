@@ -8,7 +8,7 @@ import { Optimize, Optimizer } from '../../../Optimize';
 
 export class 미추홀장애인종합복지관 extends AbstractJob {
     constructor() {
-        super('미추홀장애인종합복지관', 'https://icjb.or.kr', [
+        super('미추홀장애인종합복지관', 'https://michurc.or.kr', [
             new 미추홀공지사항(),
             new 미추홀채용(),
             new 미추홀소식(),
