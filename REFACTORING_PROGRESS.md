@@ -1,6 +1,6 @@
 # Decorator 기반 예외처리 리팩터링 진행 상황
 
-## 📊 전체 진행률: 50% (5/10 완료)
+## 📊 전체 진행률: 70% (7/10 완료)
 
 ## ✅ 완료된 작업
 
@@ -37,9 +37,31 @@
 - [x] 현재 예외 처리 방식 검토
 - [x] 이미 직접 예외 throw 방식 사용 중이라 추가 작업 불필요
 
+### Phase 3: 상위 레벨 통합 ✅
+
+#### 6. handler.ts 리팩터링 ✅
+- [x] Result 타입 체크 로직 제거 (`isFailure`, `isSuccess` 제거)
+- [x] 직접 try-catch 예외 처리로 변경
+- [x] CrawlingService 호출 방식 변경 (더이상 Result 타입 아님)
+- [x] S3Service 호출 방식 변경 (더이상 Result 타입 아님)
+- [x] 기존 응답 형식 유지 확인
+- [x] AppError 처리 로직 개선
+
+#### 7. ErrorHandling.ts 정리 및 Decorator 유틸리티 추가 ✅
+- [x] 사용하지 않는 HOF 함수들 제거 (`withErrorHandling`, `withSyncErrorHandling`)
+- [x] Result 타입 관련 함수들 제거 (`Result`, `isSuccess`, `isFailure`, `success`, `failure`, `wrapError`)
+- [x] 주석으로 처리된 불필요한 코드 완전 제거 (`combineResults`, `unwrapOr` 등)
+- [x] HandleErrors Decorator를 핵심 유틸리티로 유지
+- [x] 코드 품질 개선: 223라인 → 68라인 (70% 단순화)
+- [x] ErrorHandling.test.ts 제거 (HOF 함수 테스트 불필요)
+- [x] CrawlingService_temp.ts 임시 파일 제거
+
 ## 🔄 현재 진행 중인 작업
 
-- [ ] **handler.ts 리팩터링** - Result 타입 체크 로직 제거
+- [ ] **최종 정리 작업**
+  - 모든 파일에서 불필요한 import 제거
+  - 코드 스타일 통일성 확인
+  - 문서 업데이트 (필요시)
 
 ## 📋 작업 체크리스트
 
@@ -86,10 +108,11 @@
 - [x] 기존 응답 형식 유지 확인
 - [x] AppError 처리 로직 개선
 
-#### 7. ErrorHandling.ts 정리 및 Decorator 유틸리티 추가
-- [ ] 사용하지 않는 HOF 함수들 제거 또는 deprecated 표시
-- [ ] Result 타입 관련 함수들 정리
-- [ ] 여전히 필요한 유틸리티 함수들 확인
+#### 7. ErrorHandling.ts 정리 및 Decorator 유틸리티 추가 ✅
+- [x] 사용하지 않는 HOF 함수들 제거 (`withErrorHandling`, `withSyncErrorHandling`)
+- [x] Result 타입 관련 함수들 제거 (`Result`, `isSuccess`, `isFailure`, `success`, `failure`, `wrapError`)
+- [x] 주석으로 처리된 불필요한 코드 완전 제거 (`combineResults`, `unwrapOr` 등)
+- [x] HandleErrors Decorator를 핵심 유틸리티로 유지
 
 ### Phase 4: 검증 및 정리
 
@@ -180,14 +203,20 @@
 - **S3Service.ts**: 64 → 20 라인 (44 라인 감소, 69% 단순화)
 - **CrawlingService.ts**: 143 → 95 라인 (48 라인 감소, 34% 단순화)
 - **handler.ts**: 116 → 95 라인 (21 라인 감소, 18% 단순화)
-- **ErrorHandling.ts**: HandleErrors Decorator 구현 추가
+- **ErrorHandling.ts**: 223 → 68 라인 (155 라인 감소, 70% 단순화)
 - **tsconfig.json**: +2 라인 (Decorator 설정)
+- **총 268 라인 감소** (코드 복잡도 대폭 감소)
 
 ### 제거/추가된 코드
 - **HOF 함수 호출 제거**: 5개 (완료)
 - **Result 타입 체크 제거**: 4개 (완료)
 - **Decorator 적용**: 5개 (완료)
 - **불필요한 import 제거**: 3개 파일 (완료)
+- **HOF 함수 정의 제거**: 2개 (`withErrorHandling`, `withSyncErrorHandling`)
+- **Result 타입 유틸리티 제거**: 6개 (`Result`, `isSuccess`, `isFailure`, `success`, `failure`, `wrapError`)
+- **주석 처리된 코드 제거**: 3개 (`combineResults`, `unwrapOr`, `unwrapOrThrow`)
+- **테스트 파일 제거**: 1개 (`ErrorHandling.test.ts`)
+- **임시 파일 제거**: 1개 (`CrawlingService_temp.ts`)
 
 ### Decorator 적용 현황
 - **@HandleErrors**: 5개 메서드에 적용 완료
@@ -195,5 +224,5 @@
 
 ---
 
-**마지막 업데이트**: 2024-07-07 00:16:XX  
-**다음 작업**: ErrorHandling.ts 정리 및 최종 정리 작업 
+**마지막 업데이트**: 2024-07-07 01:30:XX  
+**다음 작업**: 최종 정리 작업 (불필요한 import 제거, 코드 스타일 통일성 확인) 
