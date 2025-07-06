@@ -2,10 +2,10 @@ import { Context } from 'aws-lambda';
 import { CrawlingService } from './CrawlingService';
 import { S3Service } from '../s3/S3Service';
 import { getKoreaTimeISO } from '../../utils/DateUtils';
-import { isSuccess, isFailure } from '../../utils/ErrorHandling';
 import { TargetDate } from '../../entity/TargetDate';
 import { validateEvent } from './LambdaEventValidator';
 import { ERROR_MESSAGES } from '../../constants/ErrorMessages';
+import { AppError } from '../../errors/AppError';
 
 // Lambda Invocation용 이벤트 인터페이스
 export interface CrawlingEvent {
@@ -50,31 +50,9 @@ export const crawl = async (event: CrawlingEvent, context: Context): Promise<Cra
         const crawlingService = new CrawlingService();
         const crawlingResult = await crawlingService.executeCrawling(targetDate, jobName);
 
-        if (isFailure(crawlingResult)) {
-            return {
-                success: false,
-                message: crawlingResult.context || ERROR_MESSAGES.CRAWLING_FAILED,
-                targetDate: targetDate.value,
-                jobName,
-                error: crawlingResult.error.message,
-                timestamp: getKoreaTimeISO(),
-            };
-        }
-
         // 2. S3 업로드
         const s3Service = new S3Service();
-        const uploadResult = await s3Service.uploadResults(crawlingResult.data.results, targetDate, jobName);
-
-        if (isFailure(uploadResult)) {
-            return {
-                success: false,
-                message: uploadResult.context || ERROR_MESSAGES.CRAWLING_SUCCESS_UPLOAD_FAILED,
-                targetDate: targetDate.value,
-                jobName,
-                error: uploadResult.error.message,
-                timestamp: getKoreaTimeISO(),
-            };
-        }
+        const uploadResult = await s3Service.uploadResults(crawlingResult.results, targetDate, jobName);
 
         // 3. 최종 성공 응답
         const duration = Date.now() - startTime;
@@ -84,16 +62,39 @@ export const crawl = async (event: CrawlingEvent, context: Context): Promise<Cra
             targetDate: targetDate.value,
             jobName,
             data: {
-                processedJobs: crawlingResult.data.processedJobs,
-                s3Location: uploadResult.data,
-                itemCount: crawlingResult.data.itemCount,
+                processedJobs: crawlingResult.processedJobs,
+                s3Location: uploadResult,
+                itemCount: crawlingResult.itemCount,
                 duration,
             },
             timestamp: getKoreaTimeISO(),
         };
     } catch (error) {
-        // 예상치 못한 시스템 에러
+        // 예상치 못한 시스템 에러 또는 AppError
         const duration = Date.now() - startTime;
+        
+        if (error instanceof AppError) {
+            // AppError인 경우 더 구체적인 에러 정보 제공
+            console.error('비즈니스 로직 에러', {
+                error: error.message,
+                context: error.context,
+                metadata: error.metadata,
+                cause: error.cause?.message,
+                duration: `${duration}ms`,
+                remainingTime: context.getRemainingTimeInMillis(),
+            });
+
+            return {
+                success: false,
+                message: error.message,
+                targetDate: targetDate.value,
+                jobName,
+                error: error.message,
+                timestamp: getKoreaTimeISO(),
+            };
+        }
+
+        // 예상치 못한 시스템 에러
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
 
         console.error('시스템 에러', {
