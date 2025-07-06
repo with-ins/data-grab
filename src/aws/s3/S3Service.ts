@@ -1,6 +1,5 @@
 import { S3Uploader } from './S3Uploader';
 import { HandleErrors } from '../../utils/ErrorHandling';
-import { AppError } from '../../errors/AppError';
 import { ERROR_MESSAGES } from '../../constants/ErrorMessages';
 import { TargetDate } from '../../entity/TargetDate';
 import { OPERATION_CONTEXT } from '../../constants/OperationContext';
