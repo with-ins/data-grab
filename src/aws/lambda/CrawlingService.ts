@@ -4,7 +4,6 @@ import { JobRegistry } from '../../entity/job/JobRegistry';
 import { Job } from '../../entity/job/Job';
 import { JobExecutor } from '../../entity/job/JobExecutor';
 import { getKoreaTimeISO } from '../../utils/DateUtils';
-import { CrawlingEvent } from './handler';
 import { validateJobName } from './LambdaEventValidator';
 import { TargetDate } from '../../entity/TargetDate';
 import { HandleErrors } from '../../utils/ErrorHandling';
@@ -48,14 +47,18 @@ export class CrawlingService {
             const endTime = Date.now();
             console.log(`Crawling completed in ${endTime - startTime}ms`);
 
-            return {
-                processedJobs: executionResult.processedJobs,
-                results: executionResult.results,
-                itemCount: executionResult.itemCount,
-            };
+            return this.createCrawlingResult(executionResult);
         } finally {
             await this.cleanup();
         }
+    }
+
+    private createCrawlingResult(executionResult: { processedJobs: string[]; results: any[]; itemCount: number }): CrawlingResult {
+        return {
+            processedJobs: executionResult.processedJobs,
+            results: executionResult.results,
+            itemCount: executionResult.itemCount,
+        };
     }
 
     @HandleErrors(OPERATION_CONTEXT.BROWSER_INIT, ERROR_MESSAGES.BROWSER_INIT_FAILED)

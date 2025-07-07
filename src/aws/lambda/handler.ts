@@ -6,6 +6,7 @@ import { TargetDate } from '../../entity/TargetDate';
 import { validateEvent } from './LambdaEventValidator';
 import { ERROR_MESSAGES } from '../../constants/ErrorMessages';
 import { AppError } from '../../errors/AppError';
+import { OPERATION_CONTEXT } from '../../constants/OperationContext';
 
 // Lambda Invocation용 이벤트 인터페이스
 export interface CrawlingEvent {
@@ -58,70 +59,111 @@ export const crawl = async (event: CrawlingEvent, context: Context): Promise<Cra
         const uploadResult = await s3Service.uploadResults(crawlingResult.results, targetDate, jobName);
 
         // 3. 최종 성공 응답
-        const duration = Date.now() - startTime;
-        return {
-            success: true,
-            message: ERROR_MESSAGES.SUCCESS,
-            targetDate: targetDate.value,
-            jobName,
-            data: {
-                processedJobs: crawlingResult.processedJobs,
-                s3Location: uploadResult,
-                itemCount: crawlingResult.itemCount,
-                duration,
-            },
-            timestamp: getKoreaTimeISO(),
-        };
+        return createSuccessResponse(targetDate, jobName, crawlingResult, uploadResult, calcDuration(startTime));
     } catch (error) {
-        // 예상치 못한 시스템 에러 또는 AppError
-        const duration = Date.now() - startTime;
-        
-        if (error instanceof AppError) {
-            // AppError인 경우 더 구체적인 에러 정보 제공
-            console.error('비즈니스 로직 에러', {
-                error: error.message,
-                context: error.context,
-                metadata: error.metadata,
-                cause: error.cause instanceof Error ? error.cause.message : error.cause,
-                duration: `${duration}ms`,
-                remainingTime: context.getRemainingTimeInMillis(),
-            });
+        const duration = calcDuration(startTime);
 
-            return {
-                success: false,
-                message: "크롤링 실패",                        // 일반적 메시지
-                targetDate: targetDate.value,
-                jobName,
-                error: {
-                    message: (error.cause instanceof Error ? error.cause.message : undefined) || error.message,  // 원본 에러 우선
-                    context: error.context,                          // 비즈니스 컨텍스트
-                    stack: (error.cause instanceof Error ? error.cause.stack : undefined) || error.stack         // 원본 스택 우선
-                },
-                timestamp: getKoreaTimeISO(),
-            };
+        if (error instanceof AppError) {
+            return handleAppError(error, targetDate, jobName, duration, context);
         }
 
-        // 예상치 못한 시스템 에러
-        const errorMessage = error instanceof Error ? error.message : String(error);
-
-        console.error('시스템 에러', {
-            error: errorMessage,
-            stack: error instanceof Error ? error.stack : undefined,
-            duration: `${duration}ms`,
-            remainingTime: context.getRemainingTimeInMillis(),
-        });
-
-        return {
-            success: false,
-            message: ERROR_MESSAGES.SYSTEM_ERROR,   // 일반적 메시지
-            targetDate: targetDate.value,
-            jobName: event.jobName,
-            error: {
-                message: errorMessage,             // 기술적 에러 메시지
-                context: "시스템 에러",             // 시스템 레벨 컨텍스트
-                stack: error instanceof Error ? error.stack : undefined
-            },
-            timestamp: getKoreaTimeISO(),
-        };
+        return handleSystemError(error, targetDate, jobName, duration, context);
     }
+};
+
+const createSuccessResponse = (
+    targetDate: TargetDate,
+    jobName: string,
+    crawlingResult: { processedJobs: string[]; itemCount: number },
+    s3Location: string,
+    duration: number
+): CrawlingResponse => {
+    console.log('크롤링 성공 결과', {
+        targetDate: targetDate.value,
+        jobName,
+        data: {
+            processedJobs: crawlingResult.processedJobs,
+            s3Location,
+            itemCount: crawlingResult.itemCount,
+            duration,
+        },
+    })
+
+    return {
+        success: true,
+        message: ERROR_MESSAGES.SUCCESS,
+        targetDate: targetDate.value,
+        jobName,
+        data: {
+            processedJobs: crawlingResult.processedJobs,
+            s3Location,
+            itemCount: crawlingResult.itemCount,
+            duration,
+        },
+        timestamp: getKoreaTimeISO(),
+    };
+};
+
+const handleAppError = (
+    error: AppError, 
+    targetDate: TargetDate, 
+    jobName: string, 
+    duration: number, 
+    context: Context
+): CrawlingResponse => {
+    console.error('크롤링 실패', {
+        error: error.message,
+        context: error.context,
+        metadata: error.metadata,
+        cause: error.cause instanceof Error ? error.cause.message : error.cause,
+        duration: `${duration}ms`,
+        remainingTime: context.getRemainingTimeInMillis(),
+    });
+
+    return {
+        success: false,
+        message: ERROR_MESSAGES.CRAWLING_FAILED,
+        targetDate: targetDate.value,
+        jobName,
+        error: {
+            message: (error.cause instanceof Error ? error.cause.message : undefined) || error.message,
+            context: error.context,
+            stack: (error.cause instanceof Error ? error.cause.stack : undefined) || error.stack
+        },
+        timestamp: getKoreaTimeISO(),
+    };
+};
+
+const handleSystemError = (
+    error: unknown, 
+    targetDate: TargetDate, 
+    jobName: string, 
+    duration: number, 
+    context: Context
+): CrawlingResponse => {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+
+    console.error('시스템 에러', {
+        error: errorMessage,
+        stack: error instanceof Error ? error.stack : undefined,
+        duration: `${duration}ms`,
+        remainingTime: context.getRemainingTimeInMillis(),
+    });
+
+    return {
+        success: false,
+        message: ERROR_MESSAGES.SYSTEM_ERROR,
+        targetDate: targetDate.value,
+        jobName,
+        error: {
+            message: errorMessage,
+            context: OPERATION_CONTEXT.SYSTEM_ERROR,
+            stack: error instanceof Error ? error.stack : undefined
+        },
+        timestamp: getKoreaTimeISO(),
+    };
+};
+
+const calcDuration = (startTime: number): number => {
+    return Date.now() - startTime;
 };

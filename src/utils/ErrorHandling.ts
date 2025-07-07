@@ -1,4 +1,6 @@
 import { AppError } from '../errors/AppError';
+import { OperationContextType } from '../constants/OperationContext';
+import { ErrorMessageType } from '../constants/ErrorMessages';
 
 
 
@@ -48,14 +50,14 @@ function convertToAppError(error: unknown, errorMessage: string, contextName: st
  * @example
  * ```typescript
  * class MyService {
- *   @HandleErrors('DATA_FETCH', 'Failed to fetch data')
+ *   @HandleErrors(OPERATION_CONTEXT.DATA_FETCH, ERROR_MESSAGES.FETCH_FAILED)
  *   async fetchData(): Promise<Data> {
  *     // 비즈니스 로직
  *   }
  * }
  * ```
  */
-export function HandleErrors(contextName: string, errorMessage: string) {
+export function HandleErrors(contextName: OperationContextType, errorMessage: ErrorMessageType) {
   return function <T, A extends readonly unknown[]>(
     originalMethod: (...args: A) => T, 
     context: ClassMethodDecoratorContext<unknown, (...args: A) => T>
