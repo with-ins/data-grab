@@ -4,7 +4,7 @@
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "types": ["node", "jest"],
-    "target": "ES2020",
+    "target": "ES2022",
     "module": "commonjs",
     "outDir": "./dist",         // 빌드 출력 디렉토리 지정
     "rootDir": "./src",         // 소스 디렉토리 지정

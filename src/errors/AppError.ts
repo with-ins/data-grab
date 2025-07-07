@@ -6,10 +6,10 @@ export class AppError extends Error {
     constructor(
         message: string,
         public readonly context: string,
-        public readonly cause?: Error,
+        cause?: Error,
         public readonly metadata?: Record<string, unknown>
     ) {
-        super(message);
+        super(message, { cause });
         this.name = 'AppError';
         
         // Error의 prototype chain을 올바르게 설정

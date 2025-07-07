@@ -16,7 +16,7 @@ export interface CrawlingEvent {
 // Lambda Invocation용 응답 인터페이스
 export interface CrawlingResponse {
     success: boolean;
-    message: string;
+    message: string;        // 사용자 친화적 메시지
     targetDate: string;
     jobName: string;
     data?: {
@@ -25,8 +25,11 @@ export interface CrawlingResponse {
         itemCount: number;
         duration: number;
     };
-    // TODO 디버깅하기 쉽게 에러 메시지가 좀 더 구체적으로 명시되어야 할지 고민
-    error?: string;
+    error?: {               // 단순화된 Error 구조!
+        message: string;    // 기술적 에러 메시지 (디버깅용)
+        context: string;    // 에러 발생 위치/컨텍스트
+        stack?: string;     // 스택 트레이스
+    };
     timestamp: string;
 }
 
@@ -79,23 +82,27 @@ export const crawl = async (event: CrawlingEvent, context: Context): Promise<Cra
                 error: error.message,
                 context: error.context,
                 metadata: error.metadata,
-                cause: error.cause?.message,
+                cause: error.cause instanceof Error ? error.cause.message : error.cause,
                 duration: `${duration}ms`,
                 remainingTime: context.getRemainingTimeInMillis(),
             });
 
             return {
                 success: false,
-                message: error.message,
+                message: "크롤링 실패",                        // 일반적 메시지
                 targetDate: targetDate.value,
                 jobName,
-                error: error.message,
+                error: {
+                    message: (error.cause instanceof Error ? error.cause.message : undefined) || error.message,  // 원본 에러 우선
+                    context: error.context,                          // 비즈니스 컨텍스트
+                    stack: (error.cause instanceof Error ? error.cause.stack : undefined) || error.stack         // 원본 스택 우선
+                },
                 timestamp: getKoreaTimeISO(),
             };
         }
 
         // 예상치 못한 시스템 에러
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        const errorMessage = error instanceof Error ? error.message : String(error);
 
         console.error('시스템 에러', {
             error: errorMessage,
@@ -106,10 +113,14 @@ export const crawl = async (event: CrawlingEvent, context: Context): Promise<Cra
 
         return {
             success: false,
-            message: ERROR_MESSAGES.SYSTEM_ERROR,
+            message: ERROR_MESSAGES.SYSTEM_ERROR,   // 일반적 메시지
             targetDate: targetDate.value,
             jobName: event.jobName,
-            error: errorMessage,
+            error: {
+                message: errorMessage,             // 기술적 에러 메시지
+                context: "시스템 에러",             // 시스템 레벨 컨텍스트
+                stack: error instanceof Error ? error.stack : undefined
+            },
             timestamp: getKoreaTimeISO(),
         };
     }
