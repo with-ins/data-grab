@@ -52,7 +52,7 @@ export class JobExecutor {
                 itemCount: flatResults.length,
             };
         } catch (error) {
-            console.error(`Job execution failed: ${job.jobName}`, error);
+            console.warn(`Job execution failed: ${job.jobName}`, error);
             throw new AppError(
                 ERROR_MESSAGES.JOB_EXECUTION_FAILED,
                 OPERATION_CONTEXT.JOB_EXECUTION,
