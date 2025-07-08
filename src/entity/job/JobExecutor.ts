@@ -70,6 +70,11 @@ export class JobExecutor {
         const viewport = options?.viewport || { width: 800, height: 600 };
         await page.setViewportSize(viewport);
 
+        // 봇 탐지 방지를 위한 User-Agent 설정
+        await page.setExtraHTTPHeaders({
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36'
+        });
+
         if (options?.timeout) {
             page.setDefaultTimeout(options.timeout);
         }
