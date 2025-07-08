@@ -1,152 +1,103 @@
 import { AppError } from '../errors/AppError';
-import { OPERATION_CONTEXT } from '../constants/OperationContext';
+import { OperationContextType } from '../constants/OperationContext';
+import { ErrorMessageType } from '../constants/ErrorMessages';
+
+
 
 /**
- * Result 타입 - 성공 또는 실패를 나타내는 타입
+ * Promise 타입 체크 유틸리티
+ * @param value - 체크할 값
+ * @returns Promise 여부
  */
-export type Result<T, E = AppError> = 
-  | { success: true; data: T }
-  | { success: false; error: E; context: string };
+function isPromiseLike<T>(value: unknown): value is Promise<T> {
+  return value != null && 
+         typeof value === 'object' && 
+         'then' in value && 
+         typeof (value as any).then === 'function';
+}
 
 /**
- * HOF(고차함수): 비동기 함수를 래핑하여 예외를 Result 타입으로 변환
+ * 에러를 AppError로 변환하는 유틸리티
+ * @param error - 원본 에러
+ * @param errorMessage - 에러 메시지
+ * @param contextName - 컨텍스트 이름
+ * @returns AppError 인스턴스
  */
-export function withErrorHandling<T, A extends any[]>(
-  fn: (...args: A) => Promise<T>,
-  context: string
-): (...args: A) => Promise<Result<T>> {
-  return async (...args: A): Promise<Result<T>> => {
-    try {
-      console.log(`[${context}] 시작`);
-      const data = await fn(...args);
-      console.log(`[${context}] 성공`);
-      return { success: true, data };
-    } catch (error) {
-      const errorInstance = error instanceof AppError 
-        ? error 
-        : new AppError(
-            error instanceof Error ? error.message : String(error),
-            context,
-            error instanceof Error ? error : undefined
-          );
-      
-      console.warn(`[${context}] 실패:`, errorInstance.toJSON());
-      
-      return { 
-        success: false, 
-        error: errorInstance,
-        context 
-      };
-    }
+function convertToAppError(error: unknown, errorMessage: string, contextName: string): AppError {
+  // 이미 AppError인 경우 그대로 반환
+  if (error instanceof AppError) {
+    return error;
+  }
+  
+  // 다른 에러인 경우 AppError로 변환
+  const cause = error instanceof Error ? error : undefined;
+  const metadata = {
+    originalError: error instanceof Error ? error.message : String(error),
+    errorType: error?.constructor?.name || typeof error
   };
+  
+  return new AppError(errorMessage, contextName, cause, metadata);
 }
 
 /**
- * HOF(고차함수): 동기 함수를 래핑하여 예외를 Result 타입으로 변환
+ * 메서드 예외 처리를 위한 Decorator (Stage 3)
+ * 메서드 실행 중 발생한 예외를 AppError로 변환하여 다시 throw
+ * 
+ * @param contextName - 로깅과 에러 컨텍스트에 사용될 이름
+ * @param errorMessage - 예외 발생 시 사용할 에러 메시지
+ * @returns 예외 처리가 적용된 메서드 Decorator
+ * 
+ * @example
+ * ```typescript
+ * class MyService {
+ *   @HandleErrors(OPERATION_CONTEXT.DATA_FETCH, ERROR_MESSAGES.FETCH_FAILED)
+ *   async fetchData(): Promise<Data> {
+ *     // 비즈니스 로직
+ *   }
+ * }
+ * ```
  */
-export function withSyncErrorHandling<T, A extends any[]>(
-  fn: (...args: A) => T,
-  context: string
-): (...args: A) => Result<T> {
-  return (...args: A): Result<T> => {
-    try {
-      console.log(`[${context}] 시작`);
-      const data = fn(...args);
-      console.log(`[${context}] 성공`);
-      return { success: true, data };
-    } catch (error) {
-      const errorInstance = error instanceof AppError 
-        ? error 
-        : new AppError(
-            error instanceof Error ? error.message : String(error),
-            context,
-            error instanceof Error ? error : undefined
-          );
-      
-      console.error(`[${context}] 실패:`, errorInstance.toJSON());
-      
-      return { 
-        success: false, 
-        error: errorInstance,
-        context 
-      };
+export function HandleErrors(contextName: OperationContextType, errorMessage: ErrorMessageType) {
+  return function <T, A extends readonly unknown[]>(
+    originalMethod: (...args: A) => T, 
+    context: ClassMethodDecoratorContext<unknown, (...args: A) => T>
+  ) {
+    // 컴파일 타임 검증
+    if (context.kind !== 'method') {
+      throw new Error(`@HandleErrors can only be applied to methods, but got ${context.kind}`);
     }
+    
+    if (typeof originalMethod !== 'function') {
+      throw new Error(`@HandleErrors can only be applied to methods, but ${String(context.name)} is not a function`);
+    }
+    
+    return function (this: unknown, ...args: A): T {
+      try {
+        console.log(`[${contextName}] 시작`);
+        
+        const result = originalMethod.apply(this, args);
+        
+        // Promise인 경우 비동기 처리
+        if (isPromiseLike(result)) {
+          return result.then(
+            (value: unknown) => {
+              console.log(`[${contextName}] 성공`);
+              return value;
+            },
+            (error: unknown) => {
+              console.warn(`[${contextName}] 실패:`, error);
+              throw convertToAppError(error, errorMessage, contextName);
+            }
+          ) as T;
+        }
+        
+        // 동기 함수인 경우
+        console.log(`[${contextName}] 성공`);
+        return result;
+      } catch (error) {
+        console.warn(`[${contextName}] 실패:`, error);
+        throw convertToAppError(error, errorMessage, contextName);
+      }
+    };
   };
-}
-
-/**
- * Result 타입 가드 함수들
- */
-export function isSuccess<T, E>(result: Result<T, E>): result is { success: true; data: T } {
-  return result.success;
-}
-
-export function isFailure<T, E>(result: Result<T, E>): result is { success: false; error: E; context: string } {
-  return !result.success;
-}
-
-/**
- * Result 헬퍼 함수들 - 중복 코드 제거를 위한 유틸리티
- */
-export function success<T>(data: T): Result<T> {
-  return { success: true, data };
-}
-
-export function failure<T>(error: AppError, context?: string): Result<T> {
-  return { success: false, error, context };
-}
-
-/**
- * Error를 AppError로 변환하는 헬퍼 함수
- */
-export function wrapError<T>(
-  error: unknown, 
-  message: string, 
-  context: string
-): Result<T> {
-  const errorInstance = error instanceof AppError 
-    ? error 
-    : new AppError(message, context, error instanceof Error ? error : undefined);
-  
-  return failure(errorInstance, context);
-}
-
-// /**
-//  * 여러 Result를 조합하는 유틸리티
-//  */
-// export function combineResults<T>(results: Result<T>[]): Result<T[]> {
-//   const successResults: T[] = [];
-//   const errors: Error[] = [];
-  
-//   for (const result of results) {
-//     if (isSuccess(result)) {
-//       successResults.push(result.data);
-//     } else {
-//       errors.push(result.error);
-//     }
-//   }
-  
-//   if (errors.length > 0) {
-//     return {
-//       success: false,
-//       error: new Error(`${errors.length}개 작업 실패: ${errors.map(e => e.message).join(', ')}`),
-//       context: 'Combined operations'
-//     };
-//   }
-  
-//   return { success: true, data: successResults };
-// }
-
-/**
- * Result에서 데이터를 안전하게 추출하는 유틸리티
- */
-// export function unwrapOr<T>(result: Result<T>, defaultValue: T): T {
-//   return isSuccess(result) ? result.data : defaultValue;
-// }
-
-// export function unwrapOrThrow<T>(result: Result<T>): T {
-//   if (isSuccess(result)) {
-//     return result.data;
-//   }
-//   throw result.error;
-// } 
+} 

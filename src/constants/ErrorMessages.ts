@@ -12,8 +12,6 @@ export const ERROR_MESSAGES = {
     
     // 성공 메시지
     SUCCESS: '크롤링 및 S3 업로드 성공',
-
-    // === AppError용 메시지들 ===
     
     // 검증 관련
     INVALID_DATE_FORMAT: 'targetDate는 YYYY-MM-DD 형식이어야 합니다',
