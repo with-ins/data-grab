@@ -40,7 +40,7 @@ export abstract class SimpleTemplateStep extends AbstractStep {
      * 각 card에서 데이터를 추출하는 메서드
      * @param card 크롤링할 카드 요소
      * @param baseUrl 기본 URL
-     * @returns 추출된 데이터 객체 또는 null (스킵할 경우)
+     * @returns 추출된 데이터 객체
      */
     abstract select(card: Locator, baseUrl: string): Promise<object>;
 }

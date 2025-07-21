@@ -25,7 +25,7 @@ class 공지사항 extends MultiCategoryTemplateStep {
         );
     }
 
-    async select(card: Locator, baseUrl: string): Promise<object | null> {
+    async select(card: Locator, baseUrl: string): Promise<object> {
         const a = card.locator('.td_subject a');
         const link = await a.getAttribute('href');
         const title = (await a.textContent()).trim();

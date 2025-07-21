@@ -45,7 +45,7 @@ export abstract class MultiCategoryTemplateStep extends AbstractStep {
      * @param baseUrl 기본 URL
      * @returns 추출된 데이터 객체 또는 null (스킵할 경우)
      */
-    abstract select(card: Locator, baseUrl: string): Promise<object | null>;
+    abstract select(card: Locator, baseUrl: string): Promise<object>;
 
     /**
      * 추출된 데이터에서 카테고리를 분류하는 메서드
