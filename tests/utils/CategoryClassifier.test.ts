@@ -3,7 +3,7 @@ import { Category } from '../../src/entity/Category';
 
 describe('CategoryClassifier', () => {
     describe('classifyCategory', () => {
-        it('엣지케이스 - 부분 문자열로 매칭된다', () => {
+        it('부분 문자열로 매칭된다', () => {
             expect(classifyCategory('신입채용공고')).toBe(Category.RECRUIT);
             expect(classifyCategory('경력채용')).toBe(Category.RECRUIT);
             expect(classifyCategory('채용면접')).toBe(Category.RECRUIT);
