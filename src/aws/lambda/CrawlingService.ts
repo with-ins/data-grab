@@ -46,18 +46,61 @@ export class CrawlingService {
 
             const endTime = Date.now();
             console.log(`Crawling completed in ${endTime - startTime}ms`);
+            
+            const crawlingResult = this.transformResults(executionResult, job.jobName);
 
-            return this.createCrawlingResult(executionResult);
+            console.log(`스크래핑 결과, items: ${crawlingResult.results.length}`);
+
+            return crawlingResult;
         } finally {
             await this.cleanup();
         }
     }
 
-    private createCrawlingResult(executionResult: { processedJobs: string[]; results: any[]; itemCount: number }): CrawlingResult {
+        /**
+     * 기존 중첩 구조를 Spring Batch JsonItemReader가 읽을 수 있는 평면 배열로 변환
+     * 기존: { '기관명': { 'notice': [...], 'recruit': [...] } }
+     * 변환: [{ jobName: '기관명', category: 'notice', ...item }, ...]
+     */
+    private transformResults(result: Record<string, any[] | null>, jobName: string): CrawlingResult {
+        const flatResults: any[] = [];
+
+        if (!result) {
+            return this.createEmptyResult(jobName);
+        }
+    
+        for (const [institutionName, categories] of Object.entries(result)) {
+            if (typeof categories === 'object' && categories !== null) {
+                for (const [category, items] of Object.entries(categories)) {
+                    if (Array.isArray(items)) {
+                        items.forEach((item) => {
+                            flatResults.push({
+                                jobName,
+                                institutionName,
+                                category,
+                                crawledAt: new Date().toISOString(),
+                                ...item,
+                            });
+                        });
+                    }
+                }
+            }
+        }
+
+        console.log(`스크래핑 결과, items: ${flatResults.length}`);
+
         return {
-            processedJobs: executionResult.processedJobs,
-            results: executionResult.results,
-            itemCount: executionResult.itemCount,
+            processedJobs: [jobName],
+            results: flatResults,
+            itemCount: flatResults.length,
+        };
+    }
+
+    private createEmptyResult(jobName: string): CrawlingResult {
+        return {
+            processedJobs: [jobName],
+            results: [],
+            itemCount: 0,
         };
     }
 
@@ -109,7 +152,7 @@ export class CrawlingService {
     }
 
     @HandleErrors(OPERATION_CONTEXT.JOB_EXECUTION, ERROR_MESSAGES.JOB_EXECUTION_FAILED)
-    private async executeJob(job: Job, context: { targetDate: Date }) {
+    private async executeJob(job: Job, context: { targetDate: Date }): Promise<Record<string, any[]>> {
         const result = await this.jobExecutor!.execute(job, context);
         return result;
     }

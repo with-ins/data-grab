@@ -3,7 +3,6 @@ import { Job } from './Job';
 import { AppError } from '../../errors/AppError';
 import { ERROR_MESSAGES } from '../../constants/ErrorMessages';
 import { OPERATION_CONTEXT } from '../../constants/OperationContext';
-// Removed infra dependencies '../../utils/ErrorHandling';
 
 export interface ExecutionContext {
     targetDate: Date;
@@ -13,12 +12,6 @@ export interface ExecutionContext {
 export interface PageOptions {
     viewport?: { width: number; height: number };
     timeout?: number;
-}
-
-export interface JobExecutionResult {
-    processedJobs: string[];
-    results: any[];
-    itemCount: number;
 }
 
 /**
@@ -34,7 +27,8 @@ export class JobExecutor {
         this.browser = browser;
     }
 
-    async execute(job: Job, context: ExecutionContext): Promise<JobExecutionResult> {
+    async execute(job: Job, context: ExecutionContext): Promise<Record<string, any[] | null>> {
+
         console.log(`${job.jobName} Job 실행 시작`);
 
         let page: Page | null = null;
@@ -42,15 +36,10 @@ export class JobExecutor {
         try {
             page = await this.createPage(context.pageOptions);
             const result = await job.run(page, context.targetDate);
-            const flatResults = this.transformResults(result, job.jobName);
 
-            console.log(`${job.jobName} Job 실행 성공, items: ${flatResults.length}`);
+            console.log(`${job.jobName} Job 실행 성공`);
 
-            return {
-                processedJobs: [job.jobName],
-                results: flatResults,
-                itemCount: flatResults.length,
-            };
+            return result;
         } catch (error) {
             console.warn(`Job execution failed: ${job.jobName}`, error);
             throw new AppError(
@@ -80,34 +69,5 @@ export class JobExecutor {
         }
 
         return page;
-    }
-
-    /**
-     * 기존 중첩 구조를 Spring Batch JsonItemReader가 읽을 수 있는 평면 배열로 변환
-     * 기존: { '기관명': { 'notice': [...], 'recruit': [...] } }
-     * 변환: [{ jobName: '기관명', category: 'notice', ...item }, ...]
-     */
-    private transformResults(result: Record<string, any[]>, jobName: string): any[] {
-        const flatResults: any[] = [];
-
-        for (const [institutionName, categories] of Object.entries(result)) {
-            if (typeof categories === 'object' && categories !== null) {
-                for (const [category, items] of Object.entries(categories)) {
-                    if (Array.isArray(items)) {
-                        items.forEach((item) => {
-                            flatResults.push({
-                                jobName,
-                                institutionName,
-                                category,
-                                crawledAt: new Date().toISOString(),
-                                ...item,
-                            });
-                        });
-                    }
-                }
-            }
-        }
-
-        return flatResults;
     }
 }
