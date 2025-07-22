@@ -1,9 +1,9 @@
-import { AbstractJob } from '../AbstractJob';
-import { SimpleTemplateStep } from '../../step/SimpleTemplateStep';
-import { Category } from '../../Category';
+import { AbstractJob } from '../../AbstractJob';
+import { SimpleTemplateStep } from '../../../step/SimpleTemplateStep';
+import { Category } from '../../../Category';
 import { Locator } from 'playwright-core';
-import { parseDate } from '../../../utils/DateUtils';
-import { Optimize, Optimizer } from '../../Optimize';
+import { parseDate } from '../../../../utils/DateUtils';
+import { Optimize, Optimizer } from '../../../Optimize';
 
 export class 한국노인인력개발원 extends AbstractJob {
     constructor() {

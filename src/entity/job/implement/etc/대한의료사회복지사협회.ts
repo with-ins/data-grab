@@ -1,9 +1,9 @@
-import { AbstractJob } from '../AbstractJob';
-import { SimpleTemplateStep } from '../../step/SimpleTemplateStep';
+import { AbstractJob } from '../../AbstractJob';
+import { SimpleTemplateStep } from '../../../step/SimpleTemplateStep';
 import { Locator } from 'playwright-core';
-import { Category } from '../../Category';
-import { parseDate } from '../../../utils/DateUtils';
-import { Optimize, Optimizer } from '../../Optimize';
+import { Category } from '../../../Category';
+import { parseDate } from '../../../../utils/DateUtils';
+import { Optimize, Optimizer } from '../../../Optimize';
 
 export class 대한의료사회복지사협회 extends AbstractJob {
     constructor() {

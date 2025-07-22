@@ -1,6 +1,6 @@
 import { Job } from './Job';
-import { 대한의료사회복지사협회 } from './implement/대한의료사회복지사협회';
-import { 한국노인인력개발원 } from './implement/한국노인인력개발원';
+import { 대한의료사회복지사협회 } from './implement/etc/대한의료사회복지사협회';
+import { 한국노인인력개발원 } from './implement/etc/한국노인인력개발원';
 import { 경기도사회복지사협회 } from './implement/gyeonggi/경기도사회복지사협회';
 import { 오정노인복지기관 } from './implement/gyeonggi/bucheon/부천시노인복지기관포털/오정노인복지관';
 import { 원미노인복지관 } from './implement/gyeonggi/bucheon/부천시노인복지기관포털/원미노인복지관';
