@@ -1,4 +1,4 @@
-import { getKoreaTimeISO, parseDate, isEqualOrAfterDateOnly } from '../../src/utils/DateUtils';
+import { getKoreaTimeISO, parseKoreaDate, isEqualOrAfterDateOnly } from '../../src/utils/DateUtils';
 
 describe('DateUtils', () => {
     describe('getKoreaTimeISO', () => {
@@ -12,33 +12,92 @@ describe('DateUtils', () => {
         });
     });
 
-    describe('parseDate', () => {
-        it.each([
-            {
-                name: '기본 구분자(-) 사용',
-                dateString: '2024-01-01',
-                separator: undefined,
-                expected: {
-                    year: 2024,
-                    month: 0,  // 0-based month
-                    date: 1
+    describe('parseKoreaDate', () => {
+        describe('기본 파싱 동작', () => {
+            it.each([
+                {
+                    name: '기본 구분자(-) 사용',
+                    dateString: '2024-01-15',
+                    separator: undefined,
+                    expected: {
+                        year: 2024,
+                        month: 0,  // 0-based month
+                        date: 15
+                    }
+                },
+                {
+                    name: '커스텀 구분자(/) 사용',
+                    dateString: '2024/03/20',
+                    separator: '/',
+                    expected: {
+                        year: 2024,
+                        month: 2,
+                        date: 20
+                    }
                 }
-            },
-            {
-                name: '커스텀 구분자(/) 사용',
-                dateString: '2024/01/01',
-                separator: '/',
-                expected: {
-                    year: 2024,
-                    month: 0,
-                    date: 1
-                }
-            }
-        ])('구분자를 사용해서 문자열을 파싱한다', ({ dateString, separator, expected }) => {
-            const result = parseDate(dateString, separator);
-            expect(result.getFullYear()).toBe(expected.year);
-            expect(result.getMonth()).toBe(expected.month);
-            expect(result.getDate()).toBe(expected.date);
+            ])('$name - 날짜를 올바르게 파싱한다', ({ dateString, separator, expected }) => {
+                const result = parseKoreaDate(dateString, separator);
+                
+                // 한국 시간대로 날짜 컴포넌트 확인
+                const koreanDate = new Date(result.toLocaleString('en-US', { timeZone: 'Asia/Seoul' }));
+                
+                expect(koreanDate.getFullYear()).toBe(expected.year);
+                expect(koreanDate.getMonth()).toBe(expected.month);
+                expect(koreanDate.getDate()).toBe(expected.date);
+            });
+        });
+
+        describe('한국 시간대 적용 검증', () => {
+            it('한국 시간대(+09:00)가 적용된 Date 객체를 반환한다', () => {
+                // given when
+                const result = parseKoreaDate('2024-06-15');
+                //then
+                const isoString = result.toISOString();
+
+                expect(result).toBeInstanceOf(Date);
+                
+                // 한국 시간대로 날짜 컴포넌트 확인
+                const koreanDate = new Date(result.toLocaleString('en-US', { timeZone: 'Asia/Seoul' }));
+                expect(koreanDate.getFullYear()).toBe(2024);
+                expect(koreanDate.getMonth()).toBe(5); // June (0-based)
+                expect(koreanDate.getDate()).toBe(15);
+            });
+
+            it('한국 시간대로 포맷된 날짜 문자열을 확인한다', () => {
+                const result = parseKoreaDate('2024-06-15');
+                
+                // 한국 로케일로 포맷했을 때의 결과 확인
+                const koreaDateString = result.toLocaleString('ko-KR', {
+                    timeZone: 'Asia/Seoul',
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit'
+                });
+                
+                // 최소한 올바른 날짜가 포함되어 있는지 확인
+                expect(koreaDateString).toContain('2024');
+                expect(koreaDateString).toContain('06');
+                expect(koreaDateString).toContain('15');
+            });
+        });
+
+        describe('실제 시간대 동작 검증', () => {
+            it('UTC 시간과의 차이를 확인한다', () => {
+                // given when
+                const result = parseKoreaDate('2024-06-15');
+                // then
+                // 같은 날짜의 UTC Date와 비교
+                const utcDate = new Date(Date.UTC(2024, 5, 15)); // June 15, 2024 UTC
+                
+                // 시간 차이 확인
+                const timeDiff = Math.abs(result.getTime() - utcDate.getTime());
+                
+                const expectedDiff = 9 * 60 * 60 * 1000; // 9시간을 밀리초로 변환
+                expect(timeDiff).toBe(expectedDiff);
+            });
         });
     });
 

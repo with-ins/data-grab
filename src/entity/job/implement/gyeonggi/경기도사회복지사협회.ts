@@ -2,7 +2,7 @@ import { AbstractJob } from '../../AbstractJob';
 import { SimpleTemplateStep } from '../../../step/SimpleTemplateStep';
 import { Locator } from 'playwright-core';
 import { Category } from '../../../Category';
-import { parseDate } from '../../../../utils/DateUtils';
+import { parseKoreaDate } from '../../../../utils/DateUtils';
 import { Optimize, Optimizer } from '../../../Optimize';
 
 export class 경기도사회복지사협회 extends AbstractJob {
@@ -32,7 +32,7 @@ class 공지사항 extends SimpleTemplateStep {
         const dateDiv = card.locator('.date_box');
         const yearMonth = (await dateDiv.locator('span').textContent()).trim();
         const day = (await dateDiv.locator('p').textContent()).trim();
-        const createdAt = parseDate(yearMonth + '.' + day, '.');
+        const createdAt = parseKoreaDate(yearMonth + '.' + day, '.');
 
         return {
             id: parseInt(id),
@@ -67,7 +67,7 @@ class 채용 extends SimpleTemplateStep {
         const dateDiv = card.locator('.date_box');
         const yearMonth = (await dateDiv.locator('span').textContent()).trim();
         const day = (await dateDiv.locator('p').textContent()).trim();
-        const createdAt = parseDate(yearMonth + '.' + day, '.');
+        const createdAt = parseKoreaDate(yearMonth + '.' + day, '.');
 
         return {
             id: parseInt(id),

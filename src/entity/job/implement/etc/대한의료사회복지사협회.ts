@@ -1,9 +1,9 @@
-import { AbstractJob } from '../AbstractJob';
-import { SimpleTemplateStep } from '../../step/SimpleTemplateStep';
+import { AbstractJob } from '../../AbstractJob';
+import { SimpleTemplateStep } from '../../../step/SimpleTemplateStep';
 import { Locator } from 'playwright-core';
-import { Category } from '../../Category';
-import { parseDate } from '../../../utils/DateUtils';
-import { Optimize, Optimizer } from '../../Optimize';
+import { Category } from '../../../Category';
+import { parseKoreaDate } from '../../../../utils/DateUtils';
+import { Optimize, Optimizer } from '../../../Optimize';
 
 export class 대한의료사회복지사협회 extends AbstractJob {
     constructor() {
@@ -31,7 +31,7 @@ class 공지사항 extends SimpleTemplateStep {
         const id = this.extractIdUsingStringMethods(link);
         const title = (await a.textContent()).trim();
         const dateStr = (await card.locator('.time').textContent()).trim();
-        const createdAt = parseDate(dateStr, '.');
+        const createdAt = parseKoreaDate(dateStr, '.');
 
         return {
             id: parseInt(id),
@@ -65,7 +65,7 @@ class 채용 extends SimpleTemplateStep {
         const id = this.extractIdUsingStringMethods(link);
         const title = (await a.textContent()).trim();
         const dateStr = (await card.locator('.time').textContent()).trim();
-        const createdAt = parseDate(dateStr, '.');
+        const createdAt = parseKoreaDate(dateStr, '.');
 
         return {
             id: parseInt(id),

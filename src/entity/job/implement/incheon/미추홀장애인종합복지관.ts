@@ -2,7 +2,7 @@ import { AbstractJob } from '../../AbstractJob';
 import { SimpleTemplateStep } from '../../../step/SimpleTemplateStep';
 import { Locator, Page } from 'playwright-core';
 import { Category } from '../../../Category';
-import { parseDate, isEqualOrAfterDateOnly } from '../../../../utils/DateUtils';
+import { parseKoreaDate, isEqualOrAfterDateOnly } from '../../../../utils/DateUtils';
 import { AbstractStep } from '../../../step/AbstractStep';
 import { Optimize, Optimizer } from '../../../Optimize';
 
@@ -59,7 +59,7 @@ class 미추홀소식 extends AbstractStep {
             ).trim();
             // 2025-05-15
             dateStr = ('20' + dateStr).slice(0, 10);
-            const createdAt = parseDate(dateStr, '-');
+            const createdAt = parseKoreaDate(dateStr, '-');
 
             if (!isEqualOrAfterDateOnly(syncDate, createdAt)) break;
 
@@ -92,7 +92,7 @@ class 미추홀채용 extends SimpleTemplateStep {
         const a = card.locator('.td_subject > a');
         const link = await a.getAttribute('href');
         const title = (await a.textContent()).trim();
-        const createdAt = parseDate((await card.locator('.td_date').textContent()).trim(), '-');
+        const createdAt = parseKoreaDate((await card.locator('.td_date').textContent()).trim(), '-');
 
         return {
             id: parseInt(id),
@@ -117,7 +117,7 @@ class 미추홀공지사항 extends SimpleTemplateStep {
         const a = card.locator('.td_subject > a');
         const link = await a.getAttribute('href');
         const title = (await a.textContent()).trim();
-        const createdAt = parseDate((await card.locator('.td_date').textContent()).trim(), '-');
+        const createdAt = parseKoreaDate((await card.locator('.td_date').textContent()).trim(), '-');
 
         return {
             id: parseInt(id),
