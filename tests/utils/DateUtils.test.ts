@@ -38,9 +38,12 @@ describe('DateUtils', () => {
             ])('$name - 날짜를 올바르게 파싱한다', ({ dateString, separator, expected }) => {
                 const result = parseKoreaDate(dateString, separator);
                 
-                expect(result.getFullYear()).toBe(expected.year);
-                expect(result.getMonth()).toBe(expected.month);
-                expect(result.getDate()).toBe(expected.date);
+                // 한국 시간대로 날짜 컴포넌트 확인
+                const koreanDate = new Date(result.toLocaleString('en-US', { timeZone: 'Asia/Seoul' }));
+                
+                expect(koreanDate.getFullYear()).toBe(expected.year);
+                expect(koreanDate.getMonth()).toBe(expected.month);
+                expect(koreanDate.getDate()).toBe(expected.date);
             });
         });
 
@@ -52,9 +55,12 @@ describe('DateUtils', () => {
                 const isoString = result.toISOString();
 
                 expect(result).toBeInstanceOf(Date);
-                expect(result.getFullYear()).toBe(2024);
-                expect(result.getMonth()).toBe(5); // June (0-based)
-                expect(result.getDate()).toBe(15);
+                
+                // 한국 시간대로 날짜 컴포넌트 확인
+                const koreanDate = new Date(result.toLocaleString('en-US', { timeZone: 'Asia/Seoul' }));
+                expect(koreanDate.getFullYear()).toBe(2024);
+                expect(koreanDate.getMonth()).toBe(5); // June (0-based)
+                expect(koreanDate.getDate()).toBe(15);
             });
 
             it('한국 시간대로 포맷된 날짜 문자열을 확인한다', () => {
