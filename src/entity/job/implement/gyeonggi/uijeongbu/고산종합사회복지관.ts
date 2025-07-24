@@ -3,9 +3,9 @@ import { Category } from "../../../../Category";
 import { Optimize, Optimizer } from "../../../../Optimize";
 import { MultiCategoryTemplateStep } from "../../../../step/MultiCategoryTemplateStep";
 import { AbstractJob } from "../../../AbstractJob";
-import { parseDate } from "../../../../../utils/DateUtils";
 import { SimpleTemplateStep } from "../../../../step/SimpleTemplateStep";
 import { classifyCategory } from "../../../../../utils/CategoryClassifier";
+import { parseDate } from "../../../../../utils/DateUtils";
 
 export class 고산종합사회복지관 extends AbstractJob {
     constructor() {

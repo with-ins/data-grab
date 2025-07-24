@@ -78,7 +78,7 @@ export class CrawlingService {
                                 jobName,
                                 institutionName,
                                 category,
-                                crawledAt: new Date().toISOString(),
+                                crawledAt: getKoreaTimeISO(),
                                 ...item,
                             });
                         });
