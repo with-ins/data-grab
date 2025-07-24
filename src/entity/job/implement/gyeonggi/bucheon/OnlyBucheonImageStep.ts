@@ -1,7 +1,7 @@
 import { AbstractStep } from '../../../../step/AbstractStep';
 import { Category } from '../../../../Category';
 import { Page } from 'playwright-core';
-import { parseDate, isEqualOrAfterDateOnly } from '../../../../../utils/DateUtils';
+import { parseKoreaDate, isEqualOrAfterDateOnly } from '../../../../../utils/DateUtils';
 
 export class OnlyBucheonImageStep extends AbstractStep {
     private readonly category: Category;
@@ -45,7 +45,7 @@ export class OnlyBucheonImageStep extends AbstractStep {
             )
                 .trim()
                 .slice(0, 10);
-            const createdAt = parseDate(dateStr);
+            const createdAt = parseKoreaDate(dateStr);
 
             if (!isEqualOrAfterDateOnly(syncDate, createdAt)) {
                 break;

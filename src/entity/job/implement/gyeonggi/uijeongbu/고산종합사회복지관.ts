@@ -5,7 +5,7 @@ import { MultiCategoryTemplateStep } from "../../../../step/MultiCategoryTemplat
 import { AbstractJob } from "../../../AbstractJob";
 import { SimpleTemplateStep } from "../../../../step/SimpleTemplateStep";
 import { classifyCategory } from "../../../../../utils/CategoryClassifier";
-import { parseDate } from "../../../../../utils/DateUtils";
+import { parseKoreaDate } from "../../../../../utils/DateUtils";
 
 export class 고산종합사회복지관 extends AbstractJob {
     constructor() {
@@ -40,7 +40,7 @@ class 공지사항_전체 extends MultiCategoryTemplateStep {
         const title = (await a.textContent()).trim();
 
         const dateStr = (await card.locator('.bo_date').textContent()).trim();
-        const createdAt = parseDate(dateStr, '-');
+        const createdAt = parseKoreaDate(dateStr, '-');
         
         return {
             title: title,
@@ -70,7 +70,7 @@ class 공지사항_안내 extends SimpleTemplateStep {
         const title = (await a.textContent()).trim();
 
         const dateStr = (await card.locator('.bo_date').textContent()).trim();
-        const createdAt = parseDate(dateStr, '-');
+        const createdAt = parseKoreaDate(dateStr, '-');
         
         return {
             title: title,
@@ -95,7 +95,7 @@ class 공지사항_공고 extends SimpleTemplateStep {
         const title = (await a.textContent()).trim();
 
         const dateStr = (await card.locator('.bo_date').textContent()).trim();
-        const createdAt = parseDate(dateStr, '-');
+        const createdAt = parseKoreaDate(dateStr, '-');
         
         return {
             title: title,

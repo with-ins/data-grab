@@ -1,6 +1,6 @@
 import { AbstractStep } from '../../../../step/AbstractStep';
 import { Page } from 'playwright-core';
-import { parseDate } from '../../../../../utils/DateUtils';
+import { parseKoreaDate } from '../../../../../utils/DateUtils';
 import { Category } from '../../../../Category';
 
 export class OnlyBucheonDefaultStep extends AbstractStep {
@@ -38,7 +38,7 @@ export class OnlyBucheonDefaultStep extends AbstractStep {
 
             const id = (await card.locator('.cell').first().textContent()).trim();
             const title = (await card.locator('.title .tit').textContent()).trim();
-            const createdAt: Date = parseDate((await card.locator('.date').textContent()).trim());
+            const createdAt: Date = parseKoreaDate((await card.locator('.date').textContent()).trim());
             const link = this.parseOnclick(await card.locator('.tit_cont').getAttribute('onclick'));
 
             list.push({

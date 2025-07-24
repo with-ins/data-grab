@@ -1,7 +1,7 @@
 import { AbstractJob } from '../../AbstractJob';
 import { AbstractStep } from '../../../step/AbstractStep';
 import { Locator, Page } from 'playwright-core';
-import { parseDate } from '../../../../utils/DateUtils';
+import { parseKoreaDate } from '../../../../utils/DateUtils';
 import { Category } from '../../../Category';
 import { Optimizer } from '../../../Optimize';
 
@@ -40,7 +40,7 @@ class IncheonWelfare extends AbstractStep {
             ).trim();
             const dateMatch = pText.match(/\d{4}\.\d{2}\.\d{2}/);
             const date = dateMatch ? dateMatch[0] : null;
-            const createdAt = parseDate(date, '.');
+            const createdAt = parseKoreaDate(date, '.');
 
             list.push({
                 id: Number(id),
@@ -84,7 +84,7 @@ class IncheonEvent extends AbstractStep {
             ).trim();
             const dateMatch = pText.match(/\d{4}\.\d{2}\.\d{2}/);
             const date = dateMatch ? dateMatch[0] : null;
-            const createdAt = parseDate(date, '.');
+            const createdAt = parseKoreaDate(date, '.');
 
             list.push({
                 id: Number(id),
@@ -124,7 +124,7 @@ class IncheonNotice extends AbstractStep {
             const title = await titleBox.textContent();
             const link = baseUrl + (await titleBox.getAttribute('href'));
 
-            const createdAt: Date = parseDate(
+            const createdAt: Date = parseKoreaDate(
                 (await card.locator('.jDate').textContent()).trim(),
                 '.'
             );

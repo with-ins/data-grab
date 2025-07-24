@@ -1,6 +1,6 @@
 import { AbstractJob } from '../../AbstractJob';
 import { Locator } from 'playwright-core';
-import { parseDate } from '../../../../utils/DateUtils';
+import { parseKoreaDate } from '../../../../utils/DateUtils';
 import { SimpleTemplateStep } from '../../../step/SimpleTemplateStep';
 import { Category } from '../../../Category';
 import { type } from 'node:os';
@@ -37,7 +37,7 @@ class SeoulEventStep extends SimpleTemplateStep {
 
         const link = baseUrl + (await a.getAttribute('href'));
         const title = (await a.textContent()).trim();
-        const createdAt = parseDate((await card.locator('.time').textContent()).trim(), '.');
+        const createdAt = parseKoreaDate((await card.locator('.time').textContent()).trim(), '.');
 
         return {
             id: parseInt(id),
@@ -62,7 +62,7 @@ class SeoulRecruitStep extends SimpleTemplateStep {
 
         const link = baseUrl + (await a.getAttribute('href'));
         const title = (await a.textContent()).trim();
-        const createdAt = parseDate((await card.locator('.time').textContent()).trim(), '.');
+        const createdAt = parseKoreaDate((await card.locator('.time').textContent()).trim(), '.');
 
         return {
             id: parseInt(id),
@@ -91,7 +91,7 @@ class SeoulNoticeStep extends SimpleTemplateStep {
 
         const link = baseUrl + (await a.getAttribute('href'));
         const title = (await a.textContent()).trim();
-        const createdAt = parseDate((await card.locator('.time').textContent()).trim(), '.');
+        const createdAt = parseKoreaDate((await card.locator('.time').textContent()).trim(), '.');
 
         return {
             id: parseInt(id),

@@ -3,7 +3,7 @@ import { Category } from "../../../../Category";
 import { Optimize, Optimizer } from "../../../../Optimize";
 import { MultiCategoryTemplateStep } from "../../../../step/MultiCategoryTemplateStep";
 import { AbstractJob } from "../../../AbstractJob";
-import { parseDate } from "../../../../../utils/DateUtils";
+import { parseKoreaDate } from "../../../../../utils/DateUtils";
 import { classifyCategory } from "../../../../../utils/CategoryClassifier";
 
 export class 고강종합사회복지관 extends AbstractJob {
@@ -31,7 +31,7 @@ class 알림마당 extends MultiCategoryTemplateStep {
         const title = (await card.locator('h3').textContent()).trim();
 
         const dateStr = (await card.locator('.digit').textContent()).trim();
-        const createdAt = parseDate(dateStr, '. ');
+        const createdAt = parseKoreaDate(dateStr, '. ');
         
         return {
             title: title,

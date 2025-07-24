@@ -3,7 +3,7 @@ import { Category } from "../../../../Category";
 import { Optimize, Optimizer } from "../../../../Optimize";
 import { MultiCategoryTemplateStep } from "../../../../step/MultiCategoryTemplateStep";
 import { AbstractJob } from "../../../AbstractJob";
-import { parseDate } from "../../../../../utils/DateUtils";
+import { parseKoreaDate } from "../../../../../utils/DateUtils";
 import { classifyCategory } from "../../../../../utils/CategoryClassifier";
 import { SimpleTemplateStep } from "../../../../step/SimpleTemplateStep";
 
@@ -32,7 +32,7 @@ class 공지사항 extends MultiCategoryTemplateStep {
         const title = (await a.textContent()).trim();
 
         const dateStr = (await card.locator('.td_date').textContent()).trim();
-        const createdAt = parseDate(dateStr, '-');
+        const createdAt = parseKoreaDate(dateStr, '-');
         return {
             title: title,
             createdAt: createdAt,
@@ -61,7 +61,7 @@ class 보도자료 extends SimpleTemplateStep {
         const title = (await a.textContent()).trim();
 
         const dateStr = (await card.locator('.td_date').textContent()).trim();
-        const createdAt = parseDate(dateStr, '-');
+        const createdAt = parseKoreaDate(dateStr, '-');
         
         return {
             title: title,
@@ -86,7 +86,7 @@ class 소식홍보지 extends SimpleTemplateStep {
         const title = (await a.textContent()).trim();
 
         const dateStr = (await card.locator('.td_date').textContent()).trim();
-        const createdAt = parseDate(dateStr, '-');
+        const createdAt = parseKoreaDate(dateStr, '-');
         
         return {
             title: title,

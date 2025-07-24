@@ -2,7 +2,7 @@ import { AbstractJob } from '../../AbstractJob';
 import { SimpleTemplateStep } from '../../../step/SimpleTemplateStep';
 import { Category } from '../../../Category';
 import { Locator } from 'playwright-core';
-import { parseDate } from '../../../../utils/DateUtils';
+import { parseKoreaDate } from '../../../../utils/DateUtils';
 import { Optimize, Optimizer } from '../../../Optimize';
 
 export class 인천광역시사회복지사협회 extends AbstractJob {
@@ -34,7 +34,7 @@ class 행사및교육 extends SimpleTemplateStep {
         const id = params.get('idx');
 
         let dateStr = '20' + (await card.locator('td:nth-child(3)').textContent()).trim();
-        const createdAt = parseDate(dateStr, '.');
+        const createdAt = parseKoreaDate(dateStr, '.');
 
         return {
             id: parseInt(id),
@@ -63,7 +63,7 @@ class 구인구직 extends SimpleTemplateStep {
         const id = params.get('idx');
 
         let dateStr = '20' + (await card.locator('td:nth-child(4)').textContent()).trim();
-        const createdAt = parseDate(dateStr, '.');
+        const createdAt = parseKoreaDate(dateStr, '.');
 
         return {
             id: parseInt(id),
@@ -88,7 +88,7 @@ class 소식 extends SimpleTemplateStep {
         const id = params.get('idx');
 
         let dateStr = '20' + (await card.locator('td:nth-child(3)').textContent()).trim();
-        const createdAt = parseDate(dateStr, '.');
+        const createdAt = parseKoreaDate(dateStr, '.');
 
         return {
             id: parseInt(id),
@@ -113,7 +113,7 @@ class 공지사항 extends SimpleTemplateStep {
         const id = params.get('idx');
 
         let dateStr = '20' + (await card.locator('td:nth-child(3)').textContent()).trim();
-        const createdAt = parseDate(dateStr, '.');
+        const createdAt = parseKoreaDate(dateStr, '.');
 
         return {
             id: parseInt(id),
