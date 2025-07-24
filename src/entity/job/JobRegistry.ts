@@ -17,6 +17,7 @@ import { 인천광역시사회복지사협회 } from './implement/incheon/인천
 import { 미추홀장애인종합복지관 } from './implement/incheon/미추홀장애인종합복지관';
 import { 서울시사회복지사협회 } from './implement/seoul/서울시사회복지사협회';
 import { 거모종합사회복지관 } from './implement/gyeonggi/siheung/거모종합사회복지관';
+import { 고강종합사회복지관 } from './implement/gyeonggi/bucheon/고강종합사회복지관';
 
 /**
  * 모든 크롤링 Job들을 등록하고 관리하는 Registry 클래스
@@ -41,6 +42,7 @@ export class JobRegistry {
         new 미추홀장애인종합복지관(),
         new 서울시사회복지사협회(),
         new 거모종합사회복지관(),
+        new 고강종합사회복지관(),
     ];
 
     static getAllJobs(): Job[] {
