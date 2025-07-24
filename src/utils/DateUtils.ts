@@ -60,3 +60,17 @@ export const isEqualOrAfterDateOnly = (baseDate: Date, compareDate: Date | null)
     
     return base >= compare;
 };
+
+/**
+ * Date 객체를 한국시간 ISO 형식 문자열로 변환
+ * @param date Date 객체
+ * @returns YYYY-MM-DDTHH:mm:ss+09:00 형식의 한국 시간 문자열
+ * @example formatKoreaDateISO(new Date()) => "2025-06-10T22:12:35+09:00"
+ */
+export function formatKoreaDateISO(date: Date): string {
+    return date
+        .toLocaleString('sv-SE', {
+            timeZone: 'Asia/Seoul',
+        })
+        .replace(' ', 'T') + '+09:00';
+}

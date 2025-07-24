@@ -3,7 +3,7 @@ import { chromium } from 'playwright-core';
 import { JobRegistry } from '../../entity/job/JobRegistry';
 import { Job } from '../../entity/job/Job';
 import { JobExecutor } from '../../entity/job/JobExecutor';
-import { getKoreaTimeISO } from '../../utils/DateUtils';
+import { getKoreaTimeISO, formatKoreaDateISO } from '../../utils/DateUtils';
 import { validateJobName } from './LambdaEventValidator';
 import { TargetDate } from '../../entity/TargetDate';
 import { HandleErrors } from '../../utils/ErrorHandling';
@@ -74,12 +74,15 @@ export class CrawlingService {
                 for (const [category, items] of Object.entries(categories)) {
                     if (Array.isArray(items)) {
                         items.forEach((item) => {
+                            // Date 객체를 한국시간 문자열로 변환
+                            const transformedItem = this.convertDateFieldsToKoreaTime(item);
+                            
                             flatResults.push({
                                 jobName,
                                 institutionName,
                                 category,
                                 crawledAt: getKoreaTimeISO(),
-                                ...item,
+                                ...transformedItem,
                             });
                         });
                     }
@@ -94,6 +97,22 @@ export class CrawlingService {
             results: flatResults,
             itemCount: flatResults.length,
         };
+    }
+
+    /**
+     * 객체 내의 Date 필드들을 한국시간 ISO 문자열로 변환
+     */
+    private convertDateFieldsToKoreaTime(item: any): any {
+        const converted = { ...item };
+        
+        // 일반적으로 사용되는 Date 필드들을 확인하고 변환
+        for (const [key, value] of Object.entries(converted)) {
+            if (value instanceof Date) {
+                converted[key] = formatKoreaDateISO(value);
+            }
+        }
+        
+        return converted;
     }
 
     private createEmptyResult(jobName: string): CrawlingResult {
