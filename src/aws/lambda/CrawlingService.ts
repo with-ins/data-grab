@@ -130,23 +130,7 @@ export class CrawlingService {
             headless: true,
             executablePath: await chromiumBinary.executablePath(),
             args: [
-                ...chromiumBinary.args,
-                // '--no-sandbox',
-                // '--disable-dev-shm-usage',
-                // '--disable-gpu',
-                // '--disable-features=VizDisplayCompositor',
-                // '--disable-background-timer-throttling',
-                // '--disable-backgrounding-occluded-windows',
-                // '--disable-renderer-backgrounding',
-                // '--disable-web-security',
-                // '--single-process',
-                // '--disable-setuid-sandbox',
-                // '--no-zygote',
-                // '--disable-accelerated-2d-canvas',
-                // '--no-first-run',
-                // '--no-default-browser-check',
-                // '--disable-extensions',
-                // '--disable-plugins',
+                ...chromiumBinary.args
             ],
         });
         console.log('Browser initialized successfully');
